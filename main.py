@@ -1,9 +1,9 @@
-import tkinter as tk
+from Console import Console
 
-window = tk.Tk()
-window.title("Test!")
 
-label = tk.Label(window, text="Hello World!")
-label.pack()
+# Console
+consoleLoop = True
+while consoleLoop:
+    consoleLoop = Console().interpreter(input())
 
-window.mainloop()
+# Mainframe
