@@ -33,3 +33,6 @@ class Student:
         self.seat = seat+1
         seatlist.remove(seat)
         return seatlist
+
+    def print(self):
+        return f"Name: '{self.name}', Birthday: '{self.birth}', id: '{self.id}'"
