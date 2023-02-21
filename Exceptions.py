@@ -9,4 +9,4 @@ class InvalidInstanceInListException(Exception):
 
     # Optional Exception message
     def getReason(self):
-        return "No reason found" if self.reason is None else "Attribute Value: " + str(self.reason)
+        return "No reason found" if self.reason is None else "Reason: " + str(self.reason)

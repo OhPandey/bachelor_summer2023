@@ -28,13 +28,34 @@ class Students:
     def printStudents(self):
         text = ""
         for i, x in enumerate(self.students):
+            if not isinstance(x, Student):
+                raise InvalidInstanceInListException(reason=x)
             text += f"{i + 1}. {x.print()}\n"
         return text
 
-    # NYI
+    def sortByName(self):
+        def sort(e):
+            if not isinstance(e, Student):
+                raise InvalidInstanceInListException(reason=e)
+            return e.getName()
+
+        self.students.sort(key=sort)
+
+    def sortByBirth(self):
+        def sort(e):
+            if not isinstance(e, Student):
+                raise InvalidInstanceInListException(reason=e)
+            return e.getBirth()
+
+        self.students.sort(key=sort)
+
     def sortById(self):
-        return
+        def sort(e):
+            if not isinstance(e, Student):
+                raise InvalidInstanceInListException(reason=e)
+            return e.getId()
+
+        self.students.sort(key=sort)
 
     def isListEmpty(self):
         return True if len(self.students) == 0 else False
-
