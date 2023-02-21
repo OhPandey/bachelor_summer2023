@@ -6,6 +6,6 @@ students = Students()
 # Console
 consoleLoop = True
 while consoleLoop:
-    consoleLoop = Console(students).interpreter(input())
+    consoleLoop = Console(students).reader(input())
 
 # Mainframe

@@ -9,10 +9,22 @@ from Student import Student
 
 
 class TextColor:
-    OKGREEN = '\033[92m'
+    OK = '\033[92m'
     WARNING = '\033[93m'
-    FAIL = '\033[91m'
-    ENDC = '\033[0m'
+    ERROR = '\033[91m'
+    END = '\033[0m'
+
+
+def consoleAnswer(color, text):
+    if color is None:
+        print(f"[{datetime.now().time()}] {text}")
+        return
+
+    if not color:
+        print(f"{TextColor.ERROR}[{datetime.now().time()}] Error: TextColor is undefined {TextColor.END}")
+        return
+
+    print(f"{color}[{datetime.now().time()}] {text} {TextColor.END}")
 
 
 class Command:
@@ -29,28 +41,41 @@ class Command:
         return self.command
 
 
-def consoleAnswer(color, text):
-    if not color:
-        print(f"{TextColor.FAIL}[{datetime.now().time()}] Internal Error: TextColor is undefined {TextColor.ENDC}")
-    print(f"{color}[{datetime.now().time()}] {text} {TextColor.ENDC}")
-
-
 class Console:
     commands = {
-        Command("Help", "Shows all the available commands", "help"),
-        Command("AddStudent", "Adds a mock student to the studentlists",
-                "addstudent <name:string> <birthday:string|optional> <matricule:string|optional>"),
-        Command("delStudent", "Deletes a student on either id or index", "delStudent <value:string> <type:1-id, "
-                                                                         "2-index>"),
-        Command("GetStudents", "Shows the current list of students", "getstudents"),
-        Command("Exit", "Exits the application", "exit")
+        Command("Help",
+                "Shows all the available commands",
+                "help"
+                ),
+        Command("AddStudent",
+                "Adds a student to students",
+                "addstudent <name:string> <birthday:string|optional> <matricule:string|optional>"
+                ),
+        Command("delStudent",
+                "Deletes a student on either id or index",
+                "delStudent <value:string> <type:1-id, 2-index>"
+                ),
+        Command("GetStudents",
+                "Shows the current list of students",
+                "getstudents"
+                ),
+        Command("Exit",
+                "Exits the application",
+                "exit"
+                )
     }
 
     def __init__(self, students):
         self.students = students
 
-    def interpreter(self, string):
+    def isCommand(self, command):
+        for x in self.commands:
+            if command.upper() == x.getCommand().upper():
+                return True
 
+        return False
+
+    def reader(self, string):
         arr = string.split()
         command = arr[0]
         arr.pop(0)
@@ -61,7 +86,7 @@ class Console:
             return True
 
         if string.upper() == "exit".upper():
-            consoleAnswer(TextColor.OKGREEN, "OK")
+            consoleAnswer(TextColor.OK, "Ending application")
             self.students.saveAsPdf()
             return False
 
@@ -69,10 +94,10 @@ class Console:
         return True
 
     def runCommands(self, command, args):
-        consoleAnswer(TextColor.OKGREEN, f"Command: {command}")
+        consoleAnswer(TextColor.OK, f"Command: {command}")
         command = command.upper()
         if command == "help".upper():
-            print(self.getHelp())
+            self.getHelp()
 
         if command == "addstudent".upper():
             self.addStudent(args)
@@ -81,13 +106,14 @@ class Console:
             self.delStudent(args)
 
         if command == "getstudents".upper():
-            print(self.getStudents())
+            self.getStudents()
 
     def getHelp(self):
         value = ""
         for x in self.commands:
             value += x.print()
-        return value
+
+        consoleAnswer(None, value)
 
     def addStudent(self, args):
         if not args:
@@ -97,8 +123,10 @@ class Console:
         name = args[0]
         birth = ""
         id = random.randint(0, 500000)
+
         if len(args) > 1:
             birth = args[1]
+
         if len(args) > 2:
             id = args[2]
 
@@ -117,13 +145,15 @@ class Console:
         type = args[1]
 
         if self.students.isListEmpty():
-            consoleAnswer(TextColor.FAIL, f"List is empty")
+            consoleAnswer(TextColor.ERROR, f"List is empty")
             return
+
         if not value.isdigit():
-            consoleAnswer(TextColor.FAIL, f"Value is not a digit")
+            consoleAnswer(TextColor.ERROR, f"Value is not a digit")
             return
+
         if not type.isdigit():
-            consoleAnswer(TextColor.FAIL, f"Type is not a digit")
+            consoleAnswer(TextColor.ERROR, f"Type is not a digit")
             return
 
         if type == "1":
@@ -138,18 +168,13 @@ class Console:
 
     def getStudents(self):
         if self.students.isListEmpty():
-            return "List is empty"
-        return self.students.printStudents()
+            print("List is empty")
+            return
 
-    def isCommand(self, command):
-        for x in self.commands:
-            if command.upper() == x.getCommand().upper():
-                return True
-        return False
+        consoleAnswer(None, self.students.printStudents())
 
     def errorMissingArguments(self):
-        consoleAnswer(TextColor.FAIL, f"Missing argument(s), check syntax in help")
+        consoleAnswer(TextColor.ERROR, f"Missing argument(s), check syntax in help")
 
     def errorInternal(self, message):
-        consoleAnswer(TextColor.FAIL, f"Internal Error: {message}")
-
+        consoleAnswer(TextColor.ERROR, f"Internal Error: {message}")
