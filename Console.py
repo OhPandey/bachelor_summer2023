@@ -62,6 +62,7 @@ class Console:
 
         if string.upper() == "exit".upper():
             consoleAnswer(TextColor.OKGREEN, "OK")
+            self.students.saveAsPdf()
             return False
 
         self.runCommands(command, args)

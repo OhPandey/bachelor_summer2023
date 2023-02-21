@@ -1,4 +1,5 @@
 from Exceptions import InvalidInstanceInListException
+from Save import Save
 from Student import Student
 from Console import TextColor
 from Console import consoleAnswer
@@ -61,7 +62,7 @@ class Students:
         def sort(e):
             if not isinstance(e, Student):
                 raise InvalidInstanceInListException(reason=e)
-            # This is a shot-handed solution to just not bother with students that are not yet assigned. In a later
+            # This is a short-handed solution to just not bother with students that are not yet assigned. In a later
             # state it makes sense to use some kind of exception to point that every student has to be assigned
             # somewhere. Alternatively (just came up with the idea) use a global value for max seat?
             # NYI
@@ -73,3 +74,6 @@ class Students:
 
     def isListEmpty(self):
         return True if len(self.students) == 0 else False
+
+    def saveAsPdf(self):
+        Save(self.students).saveAsPdf()
