@@ -57,5 +57,19 @@ class Students:
 
         self.students.sort(key=sort)
 
+    def sortBySeat(self):
+        def sort(e):
+            if not isinstance(e, Student):
+                raise InvalidInstanceInListException(reason=e)
+            # This is a shot-handed solution to just not bother with students that are not yet assigned. In a later
+            # state it makes sense to use some kind of exception to point that every student has to be assigned
+            # somewhere. Alternatively (just came up with the idea) use a global value for max seat?
+            # NYI
+            if e.getSeat() is None:
+                return -1
+            return e.getSeat()
+
+        self.students.sort(key=sort)
+
     def isListEmpty(self):
         return True if len(self.students) == 0 else False
