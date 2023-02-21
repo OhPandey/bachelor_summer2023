@@ -4,6 +4,7 @@
 import random
 from datetime import datetime
 
+from Exceptions import InvalidInstanceInListException
 from Student import Student
 
 
@@ -99,7 +100,12 @@ class Console:
             birth = args[1]
         if len(args) > 2:
             id = args[2]
-        self.students.addStudent(Student(name, birth, id))
+
+        try:
+            self.students.addStudent(Student(name, birth, id))
+        except InvalidInstanceInListException as error:
+            consoleAnswer(TextColor.FAIL, f"Internal Error: {error}. {error.getReason()}")
+
         print(f"Student with name = '{name}', birthday = '{birth}', id = '{id}' added")
 
     def delStudent(self, args):
@@ -143,4 +149,7 @@ class Console:
 
     def errorMissingArguments(self):
         consoleAnswer(TextColor.FAIL, f"Missing argument(s), check syntax in help")
+
+    def errorInternal(self, message):
+        consoleAnswer(TextColor.FAIL, f"Internal Error: {message}")
 

@@ -1,3 +1,4 @@
+from Exceptions import InvalidInstanceInListException
 from Student import Student
 from Console import TextColor
 from Console import consoleAnswer
@@ -9,11 +10,10 @@ class Students:
         self.students = list()
 
     def addStudent(self, student):
-        if isinstance(student, Student):
-            self.students.append(student)
-        else:
-            consoleAnswer(TextColor.FAIL, "Internal Error: Impossible to assign Student as student is not part of "
-                                          "student class")
+        if not isinstance(student, Student):
+            raise InvalidInstanceInListException(reason=student)
+
+        self.students.append(student)
 
     def removeStudentByElement(self, e):
         self.students.pop(e)
@@ -31,5 +31,10 @@ class Students:
             text += f"{i + 1}. {x.print()}\n"
         return text
 
+    # NYI
+    def sortById(self):
+        return
+
     def isListEmpty(self):
         return True if len(self.students) == 0 else False
+
