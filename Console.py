@@ -103,10 +103,9 @@ class Console:
 
         try:
             self.students.addStudent(Student(name, birth, id))
+            print(f"Student with name = '{name}', birthday = '{birth}', id = '{id}' added")
         except InvalidInstanceInListException as error:
-            consoleAnswer(TextColor.FAIL, f"Internal Error: {error}. {error.getReason()}")
-
-        print(f"Student with name = '{name}', birthday = '{birth}', id = '{id}' added")
+            self.errorInternal(f"{error}. {error.getReason()}")
 
     def delStudent(self, args):
         if not len(args) == 2:
