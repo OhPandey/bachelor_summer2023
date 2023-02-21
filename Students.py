@@ -1,8 +1,6 @@
 from Exceptions import InvalidInstanceInListException
 from Save import Save
 from Student import Student
-from Console import TextColor
-from Console import consoleAnswer
 
 
 class Students:
@@ -26,7 +24,7 @@ class Students:
                 return True
         return False
 
-    def printStudents(self):
+    def printStudents(self) -> str:
         text = ""
         for i, x in enumerate(self.students):
             if not isinstance(x, Student):
