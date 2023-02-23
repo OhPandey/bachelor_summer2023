@@ -5,14 +5,14 @@ from data.Student import Student
 
 class Save:
 
-    def __init__(self, students):
+    def __init__(self, students: list):
         if students is None:
             self.students = list()
         if not isinstance(students, list):
             self.students = list()
         self.students = students
 
-    def saveAsPdf(self):
+    def saveAsPdf(self) -> None:
         pdf = FPDF()
         pdf.add_page()
         pdf.set_font("Arial", size=15)

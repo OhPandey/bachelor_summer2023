@@ -9,6 +9,6 @@ class GetStudents(Command):
 
     def run(self):
         if self.students.isListEmpty():
-            print("List is empty")
+            self.response.defaultPrint("There are no students registered")
             return
         self.response.defaultPrint(self.students.printStudents())

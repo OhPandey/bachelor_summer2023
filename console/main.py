@@ -18,23 +18,21 @@ class Console:
         value = ""
         for x in self.availableCommands.getCommands():
             value += x.print()
-
         self.response.defaultPrint(value)
 
     def reader(self, string):
-        arr = string.split()
-        command = arr[0]
-        arr.pop(0)
-        args = arr
+        prompt = string.split()
+        command = prompt[0]
+        prompt.pop(0)
+        args = prompt
 
         if string.upper() == "help".upper():
             self.help()
             return True
 
-        self.response.defaultGood(f"Command: {command}")
-
         for x in self.availableCommands.getCommands():
             if command.upper() == x.getCommand().upper():
+                self.response.defaultGood(f"Command: {command}")
                 if isinstance(x.getScript(), CommandWithArguments):
                     x.getScript().setArgs(args)
                 x.getScript().run()

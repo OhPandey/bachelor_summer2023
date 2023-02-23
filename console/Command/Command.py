@@ -39,17 +39,17 @@ class CommandWithArguments(Command):
 # struct of how a command should look like
 class CommandStruct:
 
-    def __init__(self, command, desc, syntax, script):
+    def __init__(self, command: str, desc: str, syntax: str, script: Command):
         self.command = command
         self.desc = desc
         self.syntax = syntax
         self.script = script
 
-    def print(self):
+    def print(self) -> str:
         return f"{self.command} - {self.desc} | Syntax: {self.syntax}\n"
 
-    def getCommand(self):
+    def getCommand(self) -> str:
         return self.command
 
-    def getScript(self):
+    def getScript(self) -> Command:
         return self.script
