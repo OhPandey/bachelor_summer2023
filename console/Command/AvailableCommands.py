@@ -1,8 +1,8 @@
-from console.Command.Command import CommandStruct
-from console.Command.Commands.AddStudent import AddStudent
-from console.Command.Commands.DelStudent import DelStudent
-from console.Command.Commands.Exit import Exit
-from console.Command.Commands.GetStudents import GetStudents
+from Console.Command.Command import CommandStruct
+from Console.Command.Commands.AddStudent import AddStudent
+from Console.Command.Commands.DelStudent import DelStudent
+from Console.Command.Commands.Exit import Exit
+from Console.Command.Commands.GetStudents import GetStudents
 
 
 class GetStudent:

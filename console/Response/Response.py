@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from console.Response.TextColor import TextColor
+from Console.Response.TextColor import TextColor
 
 
 class Response:
