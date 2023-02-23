@@ -1,5 +1,5 @@
-from Console.Command.Commands.AddStudent import AddStudent
-from Console.main import Console
+from console.Command.Commands.AddStudent import AddStudent
+from console.main import Console
 from Students import Students
 
 students = Students()
