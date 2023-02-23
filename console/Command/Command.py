@@ -1,4 +1,4 @@
-from Console.Response.Response import Response
+from console.Response.Response import Response
 
 
 # abstract Command class

@@ -1,6 +1,6 @@
 from lib.Exceptions import InvalidInstanceInListException
 from lib.Save import Save
-from Student import Student
+from data.Student import Student
 
 
 class Students:

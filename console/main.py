@@ -2,9 +2,9 @@
 # It is also used for the final presentation
 # It should not be part of the finalized version
 
-from Console.Command.AvailableCommands import AvailableCommands
-from Console.Command.Command import CommandWithArguments
-from Console.Response.Response import Response
+from console.Command.AvailableCommands import AvailableCommands
+from console.Command.Command import CommandWithArguments
+from console.Response.Response import Response
 
 
 class Console:

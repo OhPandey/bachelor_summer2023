@@ -1,5 +1,5 @@
-from Console.Command.Command import CommandWithArguments
-from Students import Students
+from console.Command.Command import CommandWithArguments
+from data.Students import Students
 
 
 class DelStudent(CommandWithArguments):

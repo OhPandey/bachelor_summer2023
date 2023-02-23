@@ -1,8 +1,8 @@
 import random
-from Console.Command.Command import CommandWithArguments
-from Exceptions import InvalidInstanceInListException
-from Student import Student
-from Students import Students
+from console.Command.Command import CommandWithArguments
+from lib.Exceptions import InvalidInstanceInListException
+from data.Student import Student
+from data.Students import Students
 
 
 class AddStudent(CommandWithArguments):
