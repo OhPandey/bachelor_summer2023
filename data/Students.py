@@ -8,16 +8,16 @@ class Students:
     def __init__(self):
         self.students = list()
 
-    def addStudent(self, student):
+    def addStudent(self, student) -> None:
         if not isinstance(student, Student):
             raise InvalidInstanceInListException(reason=student)
 
         self.students.append(student)
 
-    def removeStudentByElement(self, e):
+    def removeStudentByElement(self, e) -> None:
         self.students.pop(e)
 
-    def removeStudentById(self, id):
+    def removeStudentById(self, id) -> bool:
         for i, x in enumerate(self.students):
             if x.getId() == id:
                 del self.students[i]
@@ -32,7 +32,7 @@ class Students:
             text += f"{i + 1}. {x.print()}\n"
         return text
 
-    def sortByName(self):
+    def sortByName(self) -> None:
         def sort(e):
             if not isinstance(e, Student):
                 raise InvalidInstanceInListException(reason=e)
@@ -40,7 +40,7 @@ class Students:
 
         self.students.sort(key=sort)
 
-    def sortByBirth(self):
+    def sortByBirth(self) -> None:
         def sort(e):
             if not isinstance(e, Student):
                 raise InvalidInstanceInListException(reason=e)
@@ -48,7 +48,7 @@ class Students:
 
         self.students.sort(key=sort)
 
-    def sortById(self):
+    def sortById(self) -> None:
         def sort(e):
             if not isinstance(e, Student):
                 raise InvalidInstanceInListException(reason=e)
@@ -56,7 +56,7 @@ class Students:
 
         self.students.sort(key=sort)
 
-    def sortBySeat(self):
+    def sortBySeat(self) -> None:
         def sort(e):
             if not isinstance(e, Student):
                 raise InvalidInstanceInListException(reason=e)
@@ -70,8 +70,8 @@ class Students:
 
         self.students.sort(key=sort)
 
-    def isListEmpty(self):
+    def isListEmpty(self) -> bool:
         return True if len(self.students) == 0 else False
 
-    def saveAsPdf(self):
+    def saveAsPdf(self) -> None:
         Save(self.students).saveAsPdf()

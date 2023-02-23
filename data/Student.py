@@ -1,6 +1,8 @@
 # Mock class atm
 import random
 
+from lib.Exceptions import InvalidInstanceInListException
+
 
 class Student:
 
@@ -30,9 +32,15 @@ class Student:
         while seat not in seatlist:
             seat = random.randint(0, maxseat - 1)
 
-        self.seat = seat+1
+        self.seat = seat + 1
         seatlist.remove(seat)
         return seatlist
 
     def print(self):
         return f"Name: '{self.name}', Birthday: '{self.birth}', id: '{self.id}'"
+
+
+def checkStudent(student) -> bool:
+    if not isinstance(student, Student):
+        raise InvalidInstanceInListException(reason=student)
+    return True
