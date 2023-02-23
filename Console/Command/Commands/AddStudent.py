@@ -11,7 +11,7 @@ class AddStudent(CommandWithArguments):
         self.students = students
 
     def run(self):
-        if self.noArgs():
+        if not self.hasArgs():
             return
 
         name = self.args[0]

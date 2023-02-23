@@ -8,7 +8,7 @@ class DelStudent(CommandWithArguments):
         self.students = students
 
     def run(self):
-        if self.checkArgs(2):
+        if not self.hasRequiredArgs(2):
             return
 
         value = self.args[0]
