@@ -19,21 +19,21 @@ class CommandWithArguments(Command):
     def setArgs(self, args):
         self.args = args
 
-    def noArgs(self):
+    def hasArgs(self):
         if not self.args:
             self.response.missingArgumentWarning()
-            return True
-        return False
+            return False
+        return True
 
-    def checkArgs(self, number: int):
-        if self.noArgs():
-            return True
+    def hasRequiredArgs(self, number: int):
+        if not self.hasArgs():
+            return False
 
         if not len(self.args) == number:
             self.response.missingArgumentWarning()
-            return True
+            return False
 
-        return False
+        return True
 
 
 # struct of how a command should look like
