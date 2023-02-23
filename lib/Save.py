@@ -1,6 +1,6 @@
 from fpdf import FPDF
 
-from Student import Student
+from data.Student import Student
 
 
 class Save:

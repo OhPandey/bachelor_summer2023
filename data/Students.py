@@ -1,5 +1,5 @@
-from Exceptions import InvalidInstanceInListException
-from Save import Save
+from lib.Exceptions import InvalidInstanceInListException
+from lib.Save import Save
 from Student import Student
 
 

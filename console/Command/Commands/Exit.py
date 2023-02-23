@@ -1,5 +1,5 @@
 from console.Command.Command import Command
-from Students import Students
+from data.Students import Students
 
 
 class Exit(Command):
