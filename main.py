@@ -1,3 +1,5 @@
+from tkinter import *
+import random
 from console.main import Console
 from data.Students import Students
 from lib.Window import Window
@@ -9,6 +11,7 @@ students = Students()
 # Mainframe
 def startWindow():
     Window().show()
+
 
 
 # Console
