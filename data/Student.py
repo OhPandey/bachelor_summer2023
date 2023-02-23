@@ -40,7 +40,7 @@ class Student:
         return f"Name: '{self.name}', Birthday: '{self.birth}', id: '{self.id}'"
 
 
-def checkStudent(student) -> bool:
+def checkStudent(student) -> Student:
     if not isinstance(student, Student):
         raise InvalidInstanceInListException(reason=student)
-    return True
+    return student

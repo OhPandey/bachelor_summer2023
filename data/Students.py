@@ -1,6 +1,5 @@
-from lib.Exceptions import InvalidInstanceInListException
 from lib.Save import Save
-from data.Student import Student
+from data.Student import *
 
 
 class Students:
@@ -9,10 +8,7 @@ class Students:
         self.students = list()
 
     def addStudent(self, student) -> None:
-        if not isinstance(student, Student):
-            raise InvalidInstanceInListException(reason=student)
-
-        self.students.append(student)
+        self.students.append(checkStudent(student))
 
     def removeStudentByElement(self, e) -> None:
         self.students.pop(e)
@@ -27,39 +23,30 @@ class Students:
     def printStudents(self) -> str:
         text = ""
         for i, x in enumerate(self.students):
-            if not isinstance(x, Student):
-                raise InvalidInstanceInListException(reason=x)
-            text += f"{i + 1}. {x.print()}\n"
+            text += f"{i + 1}. {checkStudent(x).print()}\n"
         return text
 
     def sortByName(self) -> None:
         def sort(e):
-            if not isinstance(e, Student):
-                raise InvalidInstanceInListException(reason=e)
-            return e.getName()
+            return checkStudent(e).getName()
 
         self.students.sort(key=sort)
 
     def sortByBirth(self) -> None:
         def sort(e):
-            if not isinstance(e, Student):
-                raise InvalidInstanceInListException(reason=e)
-            return e.getBirth()
+            return checkStudent(e).getBirth()
 
         self.students.sort(key=sort)
 
     def sortById(self) -> None:
         def sort(e):
-            if not isinstance(e, Student):
-                raise InvalidInstanceInListException(reason=e)
-            return e.getId()
+            return checkStudent(e).getId()
 
         self.students.sort(key=sort)
 
     def sortBySeat(self) -> None:
         def sort(e):
-            if not isinstance(e, Student):
-                raise InvalidInstanceInListException(reason=e)
+            e = checkStudent(e)
             # This is a short-handed solution to just not bother with students that are not yet assigned. In a later
             # state it makes sense to use some kind of exception to point that every student has to be assigned
             # somewhere. Alternatively (just came up with the idea) use a global value for max seat?
