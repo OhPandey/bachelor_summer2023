@@ -8,9 +8,6 @@ class Window:
         self.window.title(title)
         self.window.geometry('400x300')
 
-    def loop(self):
-        self.window.mainloop()
-
     def show(self):
         def change():
             lbl.config(text="You did it!")
@@ -36,7 +33,10 @@ class Window:
         def message():
             print('Amazing!')
 
-        self.loop()
+        self.start()
+
+    def start(self):
+        self.window.mainloop()
 
     def end(self):
         self.window.destroy()

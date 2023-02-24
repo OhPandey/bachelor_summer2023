@@ -13,7 +13,6 @@ def startWindow():
     Window().show()
 
 
-
 # Console
 def startConsole():
     mainloop = True
