@@ -1,27 +1,10 @@
-from tkinter import *
-import random
-from console.main import Console
-from data.Students import Students
-from lib.Window import Window
-from threading import Thread
+import cv2
 
-students = Students()
+from cv.detection import runCamera
+from core.students import Students
 
-
-# Mainframe
-def startWindow():
-    Window().show()
+# Playground for image
+runCamera(0)
 
 
-# Console
-def startConsole():
-    mainloop = True
-    while mainloop:
-        mainloop = Console(students).reader(input())
 
-
-t1 = Thread(target=startConsole)
-t2 = Thread(target=startWindow)
-
-t1.start()
-t2.start()

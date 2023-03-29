@@ -1,5 +1,5 @@
+from core.student import checkStudent
 from lib.Save import Save
-from data.Student import *
 
 
 class Students:

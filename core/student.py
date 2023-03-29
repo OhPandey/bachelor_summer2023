@@ -1,4 +1,4 @@
-# Mock class atm
+# Mock core atm
 import random
 
 from lib.Exceptions import InvalidInstanceInListException

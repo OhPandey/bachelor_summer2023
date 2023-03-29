@@ -1,6 +1,6 @@
 class InvalidInstanceInListException(Exception):
-    # Exception raised when trying to add a non-student class to the students list
-    def __init__(self, message="Element of the students list is not part of the Student class", reason=None):
+    # Exception raised when trying to add a non-student core to the students list
+    def __init__(self, message="Element of the students list is not part of the Student core", reason=None):
         self.message = message
         self.reason = reason
 
