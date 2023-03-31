@@ -1,10 +1,11 @@
 import cv2
 
-from cv.detection import runCamera
+from cv.NMLDetector import *
+
 from core.students import Students
 
 # Playground for image
-runCamera(0)
-
+NMLDetector().runImage('photo5.jpg')
+# NMLDetector().runCapture(0)
 
 
