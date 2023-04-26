@@ -1,11 +1,4 @@
-import cv2
+from finalisation.App import App
 
-from cv.NMLDetector import *
-
-from core.students import Students
-
-# Playground for image
-NMLDetector().runImage('photo5.jpg')
-# NMLDetector().runCapture(0)
-
-
+if __name__ == '__main__':
+    App()

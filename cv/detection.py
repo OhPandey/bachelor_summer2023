@@ -76,29 +76,29 @@ def featurematching(frame):
 
 # def templatematching(frame):
 #     img_bgr = frame
-#     img_gray = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2GRAY)
+#     img_gray = cv2stuff.cvtColor(img_bgr, cv2stuff.COLOR_BGR2GRAY)
 #
-#     template = cv2.imread('studentcard2.png', 0)
+#     template = cv2stuff.imread('studentcard2.png', 0)
 #     for size in range(50, 200):
 #         width = int(template.shape[1] * size / 100)
 #         height = int(template.shape[0] * size / 100)
-#         resized = cv2.resize(template, (width, height), interpolation=cv2.INTER_AREA)
+#         resized = cv2stuff.resize(template, (width, height), interpolation=cv2stuff.INTER_AREA)
 #         w, h = resized.shape[::-1]
 #
-#         res = cv2.matchTemplate(img_gray, resized, cv2.TM_CCOEFF_NORMED)
+#         res = cv2stuff.matchTemplate(img_gray, resized, cv2stuff.TM_CCOEFF_NORMED)
 #         treshold = 0.7
 #         loc = np.where(res >= treshold)
 #
 #         for pt in zip(*loc[::-1]):
-#             cv2.rectangle(img_bgr, pt, (pt[0] - 10 + round((w * 0.8 * 2)), pt[1] + h * 4), (0, 255, 255), 2)
+#             cv2stuff.rectangle(img_bgr, pt, (pt[0] - 10 + round((w * 0.8 * 2)), pt[1] + h * 4), (0, 255, 255), 2)
 #
-#     cv2.imshow('test', img_bgr)
-#     if cv2.waitKey(1) == ord('q'):
+#     cv2stuff.imshow('test', img_bgr)
+#     if cv2stuff.waitKey(1) == ord('q'):
 #         raise WindowsClosed
 
 
 # def featurematching(frame):
-#     img = cv2.imread('photo.jpg', 0)
+#     img = cv2stuff.imread('photo.jpg', 0)
 #
 #     # recognize text
 #     result = recognize_text('photo.jpg')
@@ -115,15 +115,15 @@ def featurematching(frame):
 #             bottom_right = (int(bottom_right[0]), int(bottom_right[1]))
 #
 #             # create a rectangle for bbox display
-#             cv2.rectangle(img=img, pt1=top_left, pt2=bottom_right, color=(255, 0, 0), thickness=1)
+#             cv2stuff.rectangle(img=img, pt1=top_left, pt2=bottom_right, color=(255, 0, 0), thickness=1)
 #
 #             # put recognized text
-#             cv2.putText(img=img, text=text, org=(top_left[0], top_left[1] - 10), fontFace=cv2.FONT_HERSHEY_SIMPLEX,
+#             cv2stuff.putText(img=img, text=text, org=(top_left[0], top_left[1] - 10), fontFace=cv2stuff.FONT_HERSHEY_SIMPLEX,
 #                         fontScale=0.5, color=(255, 0, 0), thickness=1)
 #
 #     # show and save image
-#     cv2.imshow('test', img)
-#     cv2.waitKey(0)
+#     cv2stuff.imshow('test', img)
+#     cv2stuff.waitKey(0)
 
 def runCamera(cam):
     # Original Source: https://docs.opencv.org/3.4/dd/d43/tutorial_py_video_display.html
