@@ -21,6 +21,7 @@ class VideoCapture(Threading):
 
         self.frame = None
         self.process = process
+        self.process.set_fps(self.fps)
 
     def start(self):
         super().start()

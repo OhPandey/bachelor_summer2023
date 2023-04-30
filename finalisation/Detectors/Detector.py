@@ -2,23 +2,49 @@ from abc import ABC, abstractmethod
 
 import cv2
 
+from finalisation.utils.Position import Position
+
 
 class Detector(ABC):
 
-    def __init__(self, frame):
+    def __init__(self, id, frame, queue):
         super().__init__()
+        self.id = id
+        self.queue = queue
         self.frame = frame
         self.grayFrame = cv2.cvtColor(self.frame, cv2.COLOR_BGR2GRAY)
         self.template = 'truetemplate.jpg'
+        self.facePosition = None
 
     @abstractmethod
-    def isStudentCard(self):
+    def isAcceptableStudentCard(self):
+        pass
+
+    @abstractmethod
+    def retrieveData(self):
         pass
 
     def getQuality(self):
-        sharpness = cv2.Laplacian(self.grayFrame, cv2.CV_64F).var()
-        brightness = cv2.mean(self.grayFrame)[0]
-        min_val, max_val, _, _ = cv2.minMaxLoc(self.grayFrame)
-        contrast = (max_val - min_val) / max_val
+        return cv2.PSNR(self.grayFrame, cv2.equalizeHist(self.grayFrame))
 
-        return sharpness+brightness+contrast
+    def isFaceCloseEnough(self):
+        faces = cv2.CascadeClassifier('haarcascade_frontalface_default.xml').detectMultiScale(self.frame, 1.1, 4)
+
+        # Check for a face
+        if len(faces) != 1:
+            return False
+
+        face = faces[0]
+
+        # Check if face is close enough by length
+        if face[2] <= 80 and face[3] <= 80:
+            return False
+        else:
+            offset = 20
+            x1 = face[0] - offset
+            y1 = face[1] - offset
+            x2 = face[0] + face[2] + offset
+            y2 = face[1] + face[3] + offset
+            self.facePosition = Position(x1, y1, x2, y2)
+            return True
+

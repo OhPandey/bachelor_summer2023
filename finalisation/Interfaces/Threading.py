@@ -2,7 +2,6 @@ import threading
 from abc import ABC, abstractmethod
 
 
-# Python doesn't have direct Interface support (at least from what I've seen), thus I'm just using Abstract Classes
 class Threading(ABC):
 
     def __init__(self):
@@ -23,7 +22,6 @@ class Threading(ABC):
         if self._running:
             self._running = False
             self.thread.join()
-            print('THREAD CLOSED')
         else:
             raise ValueError("Attempted to stop a Thread while it was not running")
 

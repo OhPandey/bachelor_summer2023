@@ -1,7 +1,6 @@
 import cv2
 
 from cv.Detector import Detector, WindowsClosed
-from cv.RectanglePosition import Position
 
 
 # Non-Machine Learning Approach
