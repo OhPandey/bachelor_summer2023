@@ -8,15 +8,18 @@ from finalisation.utils.Position import Position
 # It checks the card in a normal non-machine learning approach
 # but takes advantage of the face recognition (that is easily available) to find the card position
 class HMLDetector(Detector):
-    def isAcceptableStudentCard(self):
-        if self._findFeatures() >= 10:
-            if self.isFaceCloseEnough():
-                print('I found an acceptable Student Card!')
+    def is_acceptable_student_card(self):
+        if self._find_features() >= 10:
+            print('Its something')
+            if self.is_face_close_enough():
+                print('Face is ok')
+                if self.is_card_close_enough():
+                    print('I found an acceptable Student Card!')
                 return True
 
         return False
 
-    def _findFeatures(self):
+    def _find_features(self):
         template = cv2.imread(self.template, 0)
         sift = cv2.SIFT_create()
         kp1, des1 = sift.detectAndCompute(template, None)
@@ -35,6 +38,7 @@ class HMLDetector(Detector):
                         goodMatches.append(m)
                 except ValueError:
                     pass
+                # print(len(goodMatches))
             return len(goodMatches)
 
         return 0
@@ -42,7 +46,35 @@ class HMLDetector(Detector):
     def retrieveData(self):
         pass
 
+    def is_face_close_enough(self):
+        face = self.get_face()
+        if self.get_face() is None:
+            return False
+
+        # Check if face is close enough (by pixel length of face_size)
+        if face[2] >= self.face_offset and face[3] >= self.face_offset:
+            self.face_position = self._get_face_position(face)
+            self.transform_face_into_card()
+            return True
+        else:
+            return False
+
+    # This is function which transforms the position of the face into a student card.
+    # It is hard-coded and only works for the specific student cards.
+    def transform_face_into_card(self):
+        if self.face_position is None:
+            return None
+
+        if not isinstance(self.face_position, Position):
+            return None
+
+        x1 = self.face_position.get_x1() - round(self.face_position.get_width() * 2.9)
+        y1 = self.face_position.get_y1() - round(self.face_position.get_height() * 0.9)
+        x2 = self.face_position.get_x2() + round(self.face_position.get_width() / 2.5)
+        y2 = self.face_position.get_y2() + round(self.face_position.get_height() * 0.75)
+        self.card_position = Position(x1, y1, x2, y2)
+
     def printFrameWithText(self):
-        cv2.putText(self.frame, str(self.getQuality()), (0, 100), cv2.FONT_HERSHEY_COMPLEX, 1, (0, 0, 0), 3)
+        cv2.putText(self.frame, str(self.get_quality()), (0, 100), cv2.FONT_HERSHEY_COMPLEX, 1, (0, 0, 0), 3)
         cv2.imwrite('debugging/image' + str(self.id) + '.jpg', self.frame)
-        return self.queue.put((self.id, self.getQuality()))
+        return self.queue.put((self.id, self.get_quality()))

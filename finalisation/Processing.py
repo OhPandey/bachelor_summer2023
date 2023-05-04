@@ -11,11 +11,11 @@ class Processing(Threading):
     def __init__(self):
         super().__init__()
         self.fps = None
-        self.countFrame = 1
-        self.normalAllowedFrame = 5
-        self.bufferSize = 10
-        self.mainBuffer = list()
-        self.overflowBuffer = list()
+        self.countframes = 1
+        self.buffersize = 10
+        self.mainbuffer = list()
+        self.overflowbuffer = list()
+        self.detectionoption = 1
 
     def start(self):
         super().start()
@@ -26,38 +26,39 @@ class Processing(Threading):
     def stop(self):
         super().stop()
 
-    def isMainBufferFull(self):
-        return len(self.mainBuffer) >= self.bufferSize
+    def is_mainbufferfull(self):
+        return len(self.mainbuffer) >= self.buffersize
 
-    def isOverflowBufferFull(self):
-        return len(self.overflowBuffer) >= self.bufferSize
+    def is_overflowbufferfull(self):
+        return len(self.overflowbuffer) >= self.buffersize
 
     def flush(self):
-        self.mainBuffer.clear()
-        self.mainBuffer = self.overflowBuffer[-10:]
-        if len(self.overflowBuffer) >= 10:
-            print(f"Frames removed:{len(self.overflowBuffer) - 10}")
-        self.overflowBuffer.clear()
+        self.mainbuffer.clear()
+        self.mainbuffer = self.overflowbuffer[-10:]
+        # if len(self.overflowbuffer) >= 10:
+        #    print(f"Frames dropped:{len(self.overflowbuffer) - 10}")
+        self.overflowbuffer.clear()
 
     def _mainloop(self):
         while self._running:
-            if self.isMainBufferFull():
-                if self.isFirstFrameStudentCard():
-                    self.runProcesses()
-
+            if self.is_mainbufferfull():
+                firstframe = self.mainbuffer[0]
+                detector = self.get_detection(firstframe)
+                if detector.is_acceptable_student_card():
+                    self._run()
                 self.flush()
             else:
                 time.sleep(0.1)
 
-    def isFirstFrameStudentCard(self):
-        return HMLDetector(0, self.mainBuffer[0], None).isAcceptableStudentCard()
+    def get_detection(self, frame, id=0, queue=None):
+        if self.detectionoption == 1:
+            return HMLDetector(id, frame, queue)
 
-    def runProcesses(self):
+    def _run(self):
         queue = Queue()
         processes = list()
         for i in range(10):
-            print(i)
-            detector = HMLDetector(i, self.mainBuffer[i], queue)
+            detector = self.get_detection(self.mainbuffer[i], i, queue)
             process = Process(target=detector.printFrameWithText)
             processes.append(process)
 
@@ -68,10 +69,27 @@ class Processing(Threading):
             process.join()
 
         results = [result for index, result in sorted([queue.get() for i in range(10)])]
+        best = self._find_best_result(results)
+        detector = self.get_detection(self.mainbuffer[best])
+        process = Process(target=detector.retrieve_data())
+        process.start()
+        process.join()
         print(results)
+        print("----")
+        print(best)
+        print("----")
+        print(detector)
 
-    def addQueue(self, e):
-        if not self.isMainBufferFull():
-            self.mainBuffer.append(e)
+    def _find_best_result(self, array):
+        best = 0
+        for i, e in enumerate(array):
+            if array[best] > e:
+                best = i
+
+        return best
+
+    def add_queue(self, e):
+        if not self.is_mainbufferfull():
+            self.mainbuffer.append(e)
         else:
-            self.overflowBuffer.append(e)
+            self.overflowbuffer.append(e)

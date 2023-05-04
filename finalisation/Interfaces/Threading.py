@@ -15,7 +15,7 @@ class Threading(ABC):
             self.thread = threading.Thread(target=self._mainloop)
             self.thread.start()
         else:
-            raise ValueError("Attempted to start a Thread while it was already running")
+            raise ValueError("Attempted to start a thread while it was already running")
 
     @abstractmethod
     def stop(self):
@@ -23,9 +23,8 @@ class Threading(ABC):
             self._running = False
             self.thread.join()
         else:
-            raise ValueError("Attempted to stop a Thread while it was not running")
+            raise ValueError("Attempted to stop a thread while it was not running")
 
-    # Mainloop to be implemented
     @abstractmethod
     def _mainloop(self):
         pass
