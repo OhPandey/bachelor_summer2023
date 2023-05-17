@@ -59,7 +59,7 @@ class Processing(Threading):
         processes = list()
         for i in range(10):
             detector = self.get_detection(self.mainbuffer[i], i, queue)
-            process = Process(target=detector.printFrameWithText)
+            process = Process(target=detector.queue_quality())
             processes.append(process)
 
         for process in processes:

@@ -73,8 +73,3 @@ class HMLDetector(Detector):
         x2 = self.face_position.get_x2() + round(self.face_position.get_width() / 2.5)
         y2 = self.face_position.get_y2() + round(self.face_position.get_height() * 0.75)
         self.card_position = Position(x1, y1, x2, y2)
-
-    def printFrameWithText(self):
-        cv2.putText(self.frame, str(self.get_quality()), (0, 100), cv2.FONT_HERSHEY_COMPLEX, 1, (0, 0, 0), 3)
-        cv2.imwrite('debugging/image' + str(self.id) + '.jpg', self.frame)
-        return self.queue.put((self.id, self.get_quality()))

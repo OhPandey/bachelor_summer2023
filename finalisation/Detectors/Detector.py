@@ -32,10 +32,28 @@ class Detector(ABC):
         if len(data) != 3:
             return None
 
+        name = data[0]
+        date = data[1]
+        student_id = data[2]
+
+        if len(name.split()) < 2:
+            return None
+
+        if len(date.split()) != 3:
+            return None
+
+        if len(student_id) != 10:
+            return None
+
         return data
 
     def get_quality(self):
         return cv2.PSNR(self.grayFrame, cv2.equalizeHist(self.grayFrame))
+
+    def queue_quality(self):
+        cv2.putText(self.frame, str(self.get_quality()), (0, 100), cv2.FONT_HERSHEY_COMPLEX, 1, (0, 0, 0), 3)
+        cv2.imwrite('debugging/image' + str(self.id) + '.jpg', self.frame)
+        return self.queue.put((self.id, self.get_quality()))
 
     def get_faces(self):
         return cv2.CascadeClassifier('haarcascade_frontalface_default.xml').detectMultiScale(self.frame, 1.1, 4)
@@ -78,6 +96,6 @@ class Detector(ABC):
         #        print(f'Detected text: {text} (Probability: {prob:.2f})')
 
         # this is a mockup until I have the easyocr code finalised
-        array = ['Joey', '03 May 1997, 0181039342']
+        array = ['Da Silva Joey', '03 May 1997, 0181039342']
 
         return array
