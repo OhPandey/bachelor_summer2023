@@ -43,9 +43,6 @@ class HMLDetector(Detector):
 
         return 0
 
-    def retrieveData(self):
-        pass
-
     def is_face_close_enough(self):
         face = self.get_face()
         if self.get_face() is None:

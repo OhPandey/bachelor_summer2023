@@ -50,16 +50,16 @@ class Processing(Threading):
             else:
                 time.sleep(0.1)
 
-    def get_detection(self, frame, id=0, queue=None):
+    def get_detection(self, frame, queue=None):
         if self.detectionoption == 1:
-            return HMLDetector(id, frame, queue)
+            return HMLDetector(frame, queue)
 
     def _run(self):
         queue = Queue()
         processes = list()
         for i in range(10):
-            detector = self.get_detection(self.mainbuffer[i], i, queue)
-            process = Process(target=detector.queue_quality())
+            detector = self.get_detection(self.mainbuffer[i], queue)
+            process = Process(target=detector.queue_quality(i))
             processes.append(process)
 
         for process in processes:
@@ -68,24 +68,18 @@ class Processing(Threading):
         for process in processes:
             process.join()
 
-        results = [result for index, result in sorted([queue.get() for i in range(10)])]
+        results = [queue.get() for i in range(10)]
         best = self._find_best_result(results)
-        detector = self.get_detection(self.mainbuffer[best])
-        process = Process(target=detector.retrieve_data())
-        process.start()
-        process.join()
-        print(results)
-        print("----")
-        print(best)
-        print("----")
-        print(detector)
+        data = self.get_detection(self.mainbuffer[best]).retrieve_data()
+        print(data)
 
     def _find_best_result(self, array):
         best = 0
-        for i, e in enumerate(array):
-            if array[best] > e:
-                best = i
+        for i in array:
+            id, value = i
 
+            if value > array[best][1]:
+                best = id
         return best
 
     def add_queue(self, e):

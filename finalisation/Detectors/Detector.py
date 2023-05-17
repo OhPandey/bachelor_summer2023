@@ -12,9 +12,8 @@ class Detector(ABC):
     card_width = 300
     card_height = 200
 
-    def __init__(self, id, frame, queue=None):
+    def __init__(self, frame, queue=None):
         super().__init__()
-        self.id = id
         self.queue = queue
         self.frame = frame
         self.grayFrame = cv2.cvtColor(self.frame, cv2.COLOR_BGR2GRAY)
@@ -29,6 +28,7 @@ class Detector(ABC):
 
     def retrieve_data(self):
         data = self.run_text_detection()
+
         if len(data) != 3:
             return None
 
@@ -50,10 +50,10 @@ class Detector(ABC):
     def get_quality(self):
         return cv2.PSNR(self.grayFrame, cv2.equalizeHist(self.grayFrame))
 
-    def queue_quality(self):
+    def queue_quality(self, id):
         cv2.putText(self.frame, str(self.get_quality()), (0, 100), cv2.FONT_HERSHEY_COMPLEX, 1, (0, 0, 0), 3)
-        cv2.imwrite('debugging/image' + str(self.id) + '.jpg', self.frame)
-        return self.queue.put((self.id, self.get_quality()))
+        cv2.imwrite('debugging/image' + str(id) + '.jpg', self.frame)
+        return self.queue.put((id, self.get_quality()))
 
     def get_faces(self):
         return cv2.CascadeClassifier('haarcascade_frontalface_default.xml').detectMultiScale(self.frame, 1.1, 4)
@@ -70,7 +70,7 @@ class Detector(ABC):
             return False
         if not isinstance(self.card_position, Position):
             return False
-        h, w = self.frame.shape
+        h, w, z = self.frame.shape
         if self.card_position.get_x1() < 0 or self.card_position.get_y1() < 0:
             return False
         if self.card_position.get_x2() > w or self.card_position.get_y2() > h:
@@ -96,6 +96,6 @@ class Detector(ABC):
         #        print(f'Detected text: {text} (Probability: {prob:.2f})')
 
         # this is a mockup until I have the easyocr code finalised
-        array = ['Da Silva Joey', '03 May 1997, 0181039342']
+        array = ['Da Silva Joey', '03 May 1997', '0181039342']
 
         return array

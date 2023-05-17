@@ -16,14 +16,14 @@ class App:
         self.start_components()
 
     def update(self):
-        # videoframe = self.videostream.frame
-        # if videoframe is not None:
-        #     image = Image.fromarray(cv2.cvtColor(videoframe, cv2.COLOR_BGR2RGB))
-        #     photo = ImageTk.PhotoImage(image=image)
-        #     self.canvas.create_image(0, 0, image=photo, anchor=tk.NW)
-        photo = ImageTk.PhotoImage(Image.open('card.jpg'))
-        self.canvas.create_image(0, 0, image=photo, anchor=tk.NW)
-        # print("List of running threads:", threading.enumerate())
+        videoframe = self.videostream.frame
+        if videoframe is not None:
+            videoframe = cv2.cvtColor(videoframe, cv2.COLOR_BGR2RGB)
+            image = Image.fromarray(videoframe)
+            self.photo = ImageTk.PhotoImage(image=image)
+            self.canvas.create_image(0, 0, image=self.photo, anchor=tk.NW)
+
+            # print("List of running threads:", threading.enumerate())
         self.mainframe.after(self.videostream.delay, self.update)
 
     def is_videosource(self):
