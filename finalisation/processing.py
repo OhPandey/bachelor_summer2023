@@ -1,10 +1,7 @@
-import os
-import threading
 import time
-from multiprocessing import Process, Queue
 
-from finalisation.Detectors.hmldetector import HMLDetector
-from finalisation.Interfaces.threading import Threading
+from finalisation.detectors.hmldetector import HMLDetector
+from finalisation.lib.threading import Threading
 
 
 class Processing(Threading):

@@ -2,11 +2,11 @@ from abc import ABC, abstractmethod
 
 import cv2
 from easyocr import easyocr
-from finalisation.utils.state import State
+from finalisation.lib.state import State
 
 # import easyocr
 
-from finalisation.utils.position import Position
+from finalisation.lib.position import Position
 
 
 class Detector(ABC):

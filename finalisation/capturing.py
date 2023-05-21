@@ -1,6 +1,6 @@
 import cv2
 
-from finalisation.Interfaces.threading import Threading
+from finalisation.lib.threading import Threading
 
 
 class VideoCapture(Threading):

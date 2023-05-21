@@ -1,8 +1,8 @@
 import cv2
 
-from finalisation.Detectors.detector import Detector
-from finalisation.utils.position import Position
-from finalisation.utils.state import State
+from finalisation.detectors.detector import Detector
+from finalisation.lib.position import Position
+from finalisation.lib.state import State
 
 
 # This is a mix of machine learning and non-machine learning approach (Half machine-learning - HML)
