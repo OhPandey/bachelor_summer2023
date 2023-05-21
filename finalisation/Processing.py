@@ -42,45 +42,23 @@ class Processing(Threading):
     def _mainloop(self):
         while self._running:
             if self.is_mainbufferfull():
-                firstframe = self.mainbuffer[0]
-                detector = self.get_detection(firstframe)
-                if detector.is_acceptable_student_card():
-                    self._run()
+                detector = self.get_detection(self.mainbuffer[0])
+                print(detector.check())
                 self.flush()
             else:
                 time.sleep(0.1)
 
-    def get_detection(self, frame, queue=None):
+    def get_detection(self, frame):
         if self.detectionoption == 1:
-            return HMLDetector(frame, queue)
+            return HMLDetector(frame)
 
-    def _run(self):
-        queue = Queue()
-        processes = list()
-        for i in range(10):
-            detector = self.get_detection(self.mainbuffer[i], queue)
-            process = Process(target=detector.queue_quality(i))
-            processes.append(process)
+    # def _run(self):
+    #     detectors = list()
+    #     for i in range(10):
+    #         detectors.append(self.get_detection(self.mainbuffer[i]))
 
-        for process in processes:
-            process.start()
 
-        for process in processes:
-            process.join()
 
-        results = [queue.get() for i in range(10)]
-        best = self._find_best_result(results)
-        data = self.get_detection(self.mainbuffer[best]).retrieve_data()
-        print(data)
-
-    def _find_best_result(self, array):
-        best = 0
-        for i in array:
-            id, value = i
-
-            if value > array[best][1]:
-                best = id
-        return best
 
     def add_queue(self, e):
         if not self.is_mainbufferfull():
