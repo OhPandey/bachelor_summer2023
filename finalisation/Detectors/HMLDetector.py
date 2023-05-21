@@ -26,7 +26,7 @@ class HMLDetector(Detector):
         template = cv2.imread(self.template, 0)
         sift = cv2.SIFT_create()
         kp1, des1 = sift.detectAndCompute(template, None)
-        kp2, des2 = sift.detectAndCompute(self.grayFrame, None)
+        kp2, des2 = sift.detectAndCompute(self.get_grayed_frame(), None)
 
         if des2 is not None:
             bf = cv2.BFMatcher()
@@ -49,7 +49,7 @@ class HMLDetector(Detector):
 
         return 0
 
-    def transform_face_into_card(self):
+    def _transform_face_into_card(self):
         if self.face is None:
             return None
 
