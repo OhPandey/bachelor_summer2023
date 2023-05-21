@@ -20,6 +20,9 @@ class HMLDetector(Detector):
         if self.card_check() is False:
             return 1
 
+        # #cv2.imwrite('debugging/realtest.jpg', self.frame[crop.y1:crop.y2, crop.x1:crop.x2])
+        self.text_detection()
+
         return 2
 
     def _find_features(self):

@@ -91,3 +91,126 @@ class Detector(ABC):
             return False
 
         return True
+
+    # Text-detection Functions
+    def minimised_area(self):
+        if self.card is None:
+            return None
+
+        y1 = self.card.y1 + round(self.card.get_height() / 1.7)
+        x2 = self.card.x2 - round(self.card.get_width() / 2.5)
+
+        return Position(self.card.x1, y1, x2, self.card.y2)
+
+    def text_detection(self):
+        area = self.minimised_area()
+
+        if area is None:
+            return None
+
+        reader = easyocr.Reader(['en'], gpu=True)
+        frame = self.get_grayed_frame()[area.y1:area.y2, area.x1:area.x2]
+        blur = cv2.GaussianBlur(frame, (5, 5), 1)
+        cv2.imwrite('debugging/realtest.jpg', blur)
+        all_results = reader.readtext(blur)
+
+        # Evaluating the data
+
+        print(self._process_data(all_results))
+        print('SCANNED')
+
+    def _process_data(self, all_results):
+        if all_results is None:
+            return None
+
+        potential_results = list()
+        for (place, text, prob) in all_results:
+            print(f'Detected text: {text}, {prob:.2f}')
+            if prob >= 0.9:
+                potential_results.append(text)
+
+        if len(potential_results) < 3:
+            return None
+
+        student_id = None
+        year = None
+        month = None
+        day = None
+        lastname = ""
+        firstname = ""
+
+        for e in potential_results:
+            if e.isnumeric() and len(e) == 10:
+                student_id = e
+
+        if student_id is not None:
+            potential_results.remove(student_id)
+
+        print(f"I found the following id: {student_id}")
+
+        def is_year(value):
+            return value.isnumeric() and len(value) == 4
+
+        def is_month(value):
+            months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October',
+                      'November', 'December']
+            return not value.isnumeric() and value in months
+
+        def is_day(value):
+            return value.isnumeric() and len(value) == 2
+
+        foundvalues = list()
+
+        for e in potential_results:
+            v = e.split()
+            if len(v) >= 2:
+                if v[0].isnumeric() or v[1].isnumeric():
+                    found = list()
+                    for p in v:
+                        if is_year(p):
+                            year = p
+                            found.append(year)
+                        if is_day(p):
+                            day = p
+                            found.append(day)
+                    for q in found:
+                        v.remove(q)
+
+                    if is_month(v[0]):
+                        month = v[0]
+
+                    foundvalues.append(e)
+
+            if is_year(e) and year is None:
+                year = e
+                foundvalues.append(e)
+
+            if is_day(e) and day is None:
+                day = e
+                foundvalues.append(e)
+
+            if is_month(e) and month is None:
+                month = e
+                foundvalues.append(e)
+
+        if len(foundvalues) >= 1:
+            for e in foundvalues:
+                potential_results.remove(e)
+
+        for e in potential_results:
+            v = e.split()
+            for p in v:
+                if p.isupper():
+                    lastname += " " + p
+                else:
+                    firstname += " " + p
+
+        if lastname != "":
+            lastname = lastname[1:]
+
+        if firstname != "":
+            firstname = firstname[1:]
+
+        return [firstname, lastname, day, month, year, student_id]
+
+
