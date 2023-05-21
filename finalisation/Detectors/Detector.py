@@ -70,8 +70,9 @@ class Detector(ABC):
         return self.face
 
     def adjust_face(self):
-        if self.face.adjusted is False:
-            self.face.add_offset(self.face_offset)
+        if self.face is not None:
+            if self.face.adjusted is False:
+                self.face.add_offset(self.face_offset)
 
     # Card Functions
     def card_check(self):
