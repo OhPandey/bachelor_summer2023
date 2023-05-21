@@ -15,7 +15,7 @@ class HMLDetector(Detector):
         if self._find_features() < 10:
             return 0
         self.get_face()
-        self.transform_face_into_card()
+        self._transform_face_into_card()
 
         if self.card_check() is False:
             return 1
