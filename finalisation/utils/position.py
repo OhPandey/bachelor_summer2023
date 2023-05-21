@@ -8,11 +8,11 @@ class Position:
         self.x2 = x2
         self.y2 = y2
 
-    def get_width(self):
-        return self.x2 - self.x1
+    def get_width(self, p=1):
+        return round((self.x2 - self.x1)*p)
 
-    def get_height(self):
-        return self.y2 - self.y1
+    def get_height(self, p=1):
+        return round((self.y2 - self.y1)*p)
 
     def add_offset(self, offset):
         self.x1 = self.x1 - offset

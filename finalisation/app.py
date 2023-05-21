@@ -3,8 +3,8 @@ import tkinter as tk
 import cv2
 from PIL import Image, ImageTk
 
-from finalisation.Processing import Processing
-from finalisation.VideoCapture import VideoCapture
+from finalisation.processing import Processing
+from finalisation.capturing import VideoCapture
 
 
 class App:

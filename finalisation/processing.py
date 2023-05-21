@@ -3,8 +3,8 @@ import threading
 import time
 from multiprocessing import Process, Queue
 
-from finalisation.Detectors.HMLDetector import HMLDetector
-from finalisation.Interfaces.Threading import Threading
+from finalisation.Detectors.hmldetector import HMLDetector
+from finalisation.Interfaces.threading import Threading
 
 
 class Processing(Threading):

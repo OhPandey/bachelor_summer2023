@@ -2,11 +2,11 @@ from abc import ABC, abstractmethod
 
 import cv2
 from easyocr import easyocr
-from finalisation.utils.State import State
+from finalisation.utils.state import State
 
 # import easyocr
 
-from finalisation.utils.Position import Position
+from finalisation.utils.position import Position
 
 
 class Detector(ABC):
@@ -49,7 +49,7 @@ class Detector(ABC):
         return self.quality
 
     # Face Functions
-    def get_face(self):
+    def get_face(self) -> Position | None:
         if self.face is None:
             faces = cv2.CascadeClassifier('haarcascade_frontalface_default.xml').detectMultiScale(self.frame, 1.1, 4)
 
@@ -71,8 +71,7 @@ class Detector(ABC):
         return self.face
 
     # Card Functions
-    def card_check(self):
-
+    def card_check(self) -> bool:
         if self.card is None:
             return False
 
@@ -93,12 +92,23 @@ class Detector(ABC):
         return True
 
     # Text-detection Functions
-    def minimised_area(self):
+    def retrieve_data(self):
+        data = self.text_detection()
+        if data is None:
+            print('NOPE')
+        else:
+            for e in data:
+                if data[e] is None or data[e] == "":
+                    print(f'Could not read value of "{e}"')
+
+            print(data)
+
+    def minimised_area(self) -> Position | None:
         if self.card is None:
             return None
 
-        y1 = self.card.y1 + round(self.card.get_height() / 1.7)
-        x2 = self.card.x2 - round(self.card.get_width() / 2.5)
+        y1 = self.card.y1 + self.card.get_height(1/1.7)
+        x2 = self.card.x2 - self.card.get_width(1/2.5)
 
         return Position(self.card.x1, y1, x2, self.card.y2)
 
@@ -114,19 +124,17 @@ class Detector(ABC):
         cv2.imwrite('debugging/realtest.jpg', blur)
         all_results = reader.readtext(blur)
 
-        # Evaluating the data
-
-        print(self._process_data(all_results))
-        print('SCANNED')
+        return self._process_data(all_results)
 
     def _process_data(self, all_results):
+        # Evaluating the data
         if all_results is None:
             return None
 
         potential_results = list()
         for (place, text, prob) in all_results:
             print(f'Detected text: {text}, {prob:.2f}')
-            if prob >= 0.9:
+            if prob >= 0.5:
                 potential_results.append(text)
 
         if len(potential_results) < 3:
@@ -159,7 +167,7 @@ class Detector(ABC):
         def is_day(value):
             return value.isnumeric() and len(value) == 2
 
-        foundvalues = list()
+        values = list()
 
         for e in potential_results:
             v = e.split()
@@ -179,22 +187,22 @@ class Detector(ABC):
                     if is_month(v[0]):
                         month = v[0]
 
-                    foundvalues.append(e)
+                    values.append(e)
 
             if is_year(e) and year is None:
                 year = e
-                foundvalues.append(e)
+                values.append(e)
 
             if is_day(e) and day is None:
                 day = e
-                foundvalues.append(e)
+                values.append(e)
 
             if is_month(e) and month is None:
                 month = e
-                foundvalues.append(e)
+                values.append(e)
 
-        if len(foundvalues) >= 1:
-            for e in foundvalues:
+        if len(values) >= 1:
+            for e in values:
                 potential_results.remove(e)
 
         for e in potential_results:
@@ -211,6 +219,11 @@ class Detector(ABC):
         if firstname != "":
             firstname = firstname[1:]
 
-        return [firstname, lastname, day, month, year, student_id]
-
-
+        return {
+            'firstname': firstname,
+            'lastname': lastname,
+            'day': day,
+            'month': month,
+            'year': year,
+            'student_id': student_id
+        }

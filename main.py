@@ -1,5 +1,4 @@
-from finalisation.App import App
+from finalisation.app import App
 
 if __name__ == '__main__':
     App()
-
