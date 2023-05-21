@@ -19,16 +19,14 @@ class Detector(ABC):
 
     # No Configuration
     quality = None
+    frame = None
     gray_frame = None
     face = None
     card = None
+    data = None
 
-    def __init__(self, frame, queue=None):
-        self.queue = queue
+    def __init__(self, frame):
         self.frame = frame
-        self.face_position = None
-        self.card_position = None
-        self.data = None
 
     @abstractmethod
     def check(self):
@@ -67,12 +65,10 @@ class Detector(ABC):
 
             self.face = Position(x1, y1, x2, y2)
 
-        return self.face
-
-    def adjust_face(self):
-        if self.face is not None:
             if self.face.adjusted is False:
                 self.face.add_offset(self.face_offset)
+
+        return self.face
 
     # Card Functions
     def card_check(self):

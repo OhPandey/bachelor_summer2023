@@ -56,8 +56,8 @@ class HMLDetector(Detector):
         if not isinstance(self.face, Position):
             return None
 
-        x1 = self.face.x1 - round(self.face.get_width() * 2.9)
+        x1 = self.face.x1 - round(self.face.get_width() * 3)
         y1 = self.face.y1 - round(self.face.get_height() * 0.9)
         x2 = self.face.x2 + round(self.face.get_width() / 2.5)
-        y2 = self.face.y2 + round(self.face.get_height() * 0.75)
+        y2 = self.face.y2 + round(self.face.get_height() * 0.8)
         self.card = Position(x1, y1, x2, y2)

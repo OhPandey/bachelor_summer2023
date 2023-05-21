@@ -57,9 +57,6 @@ class Processing(Threading):
     #     for i in range(10):
     #         detectors.append(self.get_detection(self.mainbuffer[i]))
 
-
-
-
     def add_queue(self, e):
         if not self.is_mainbufferfull():
             self.mainbuffer.append(e)
