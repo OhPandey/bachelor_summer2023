@@ -3,7 +3,7 @@ import random
 
 class Student:
 
-    def __init__(self, first_name, last_name, birth_day, birth_month, birth_year, student_id, seat):
+    def __init__(self, last_name, first_name, birth_day, birth_month, birth_year, student_id, seat):
         self.last_name = last_name
         self.first_name = first_name
         self.birth_day = birth_day

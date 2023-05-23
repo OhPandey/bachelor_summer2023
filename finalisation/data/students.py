@@ -1,5 +1,6 @@
 import random
 from fpdf import FPDF
+import csv
 from finalisation.data.student import Student
 from finalisation.lib.exceptions import AddingStudentError, MaxSeatError
 
@@ -7,15 +8,15 @@ from finalisation.lib.exceptions import AddingStudentError, MaxSeatError
 class Students:
     def __init__(self):
         self.students = list()
-        self.seat_list = list(range(1))
+        self.seat_list = list(range(10))
 
     def add_student(self, data):
         if not isinstance(data, dict):
             raise AddingStudentError("The data given is not an dictionary")
 
-        if "first_name" not in data or "last_name" not in data or "birth_day" not in data or "birth_month" not in data or "birth_year" not in data or "student_id" not in data:
+        if "last_name" not in data or "first_name" not in data or "birth_day" not in data or "birth_month" not in data or "birth_year" not in data or "student_id" not in data:
             raise AddingStudentError("The dictionary given is does not met the required keys:"
-                                     "first_name, last_name, birth_day, birth_month, birth_year, student_id")
+                                     "last_name, first_name, birth_day, birth_month, birth_year, student_id")
 
         if self.is_duplicate(data["student_id"]):
             raise AddingStudentError("The data given is a duplicate")
@@ -28,8 +29,8 @@ class Students:
 
         self.students.append(
             Student(
-                first_name=data["first_name"],
                 last_name=data["last_name"],
+                first_name=data["first_name"],
                 birth_day=data["birth_day"],
                 birth_month=data["birth_month"],
                 birth_year=data["birth_year"],
@@ -60,14 +61,14 @@ class Students:
 
         return False
 
-    def saveAsPdf(self) -> None:
+    def save_as_pdf(self) -> None:
         pdf = FPDF()
         pdf.add_page()
         pdf.set_font("Arial", size=15)
 
         for i, x in enumerate(self.students):
             if not isinstance(x, Student):
-                text = "<Error retrieving this Student>"
+                text = f"<Error retrieving student#{i}>"
             else:
                 text = f"{x.last_name} {x.first_name}, {x.birth_day}. {x.birth_month} {x.birth_year}, {x.student_id}, SEAT: {x.seat}"
             pdf.cell(200, 5, txt=text, ln=1)
@@ -76,3 +77,24 @@ class Students:
         filename = "students"
         pdf.output(f"{filename}.pdf")
 
+    def save_as_csv(self) -> None:
+        filename = "student_data"
+        data = [
+            [
+                "Name",
+                "Birthday",
+                "Student ID",
+                "Seat Number"
+            ]
+        ]
+        for student in self.students:
+            data.append([
+                f"{student.last_name} {student.first_name}",
+                f"{student.birth_year}-{student.get_month_number()}-{student.birth_day}",
+                f"{student.student_id}",
+                f"{student.seat}"
+            ])
+
+        with open(filename+".csv", mode="w", newline="") as file:
+            writer = csv.writer(file)
+            writer.writerows(data)
