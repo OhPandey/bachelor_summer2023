@@ -1,11 +1,14 @@
 import random
 from fpdf import FPDF
+import json
 import csv
 from finalisation.data.student import Student
 from finalisation.lib.exceptions import AddingStudentError, MaxSeatError
 
 
 class Students:
+    filename = "default"
+
     def __init__(self):
         self.students = list()
         self.seat_list = list(range(10))
@@ -61,6 +64,9 @@ class Students:
 
         return False
 
+    def set_filename(self, filename):
+        self.filename = filename
+
     def save_as_pdf(self) -> None:
         pdf = FPDF()
         pdf.add_page()
@@ -74,11 +80,9 @@ class Students:
             pdf.cell(200, 5, txt=text, ln=1)
 
         # Placeholder. User should be able to decide the directory
-        filename = "students"
-        pdf.output(f"{filename}.pdf")
+        pdf.output(f"{self.filename}.pdf")
 
     def save_as_csv(self) -> None:
-        filename = "student_data"
         data = [
             [
                 "Name",
@@ -95,6 +99,21 @@ class Students:
                 f"{student.seat}"
             ])
 
-        with open(filename+".csv", mode="w", newline="") as file:
+        with open(f"{self.filename}.csv", mode="w", newline="") as file:
             writer = csv.writer(file)
             writer.writerows(data)
+
+    def save_as_json(self) -> None:
+
+        data = []
+
+        for student in self.students:
+            data.append({
+                "Name": f"{student.last_name} {student.first_name}",
+                "Birthday": f"{student.birth_year}-{student.get_month_number()}-{student.birth_day}",
+                "StudentID": student.student_id,
+                "Seat": student.seat
+            })
+
+        with open(f"{self.filename}.json", "w") as file:
+            json.dump(data, file)
