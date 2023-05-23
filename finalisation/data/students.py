@@ -1,7 +1,6 @@
 import random
 
 from finalisation.data.student import Student
-from lib.Exceptions import InvalidInstanceInListException
 
 
 class Students:
@@ -33,7 +32,7 @@ class Students:
                 birth_month=data["birth_month"],
                 birth_year=data["birth_year"],
                 student_id=data["student_id"],
-                seat_list=val
+                seat=val
             )
         )
 
@@ -56,4 +55,5 @@ class Students:
             if x.getId() == student_by:
                 self.remove_student_by_element(i)
                 return True
+
         return False

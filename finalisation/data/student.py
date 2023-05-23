@@ -3,16 +3,16 @@ import random
 
 class Student:
 
-    def __init__(self, first_name, last_name, birth_day, birth_month, birth_year, student_id, seat_list):
+    def __init__(self, first_name, last_name, birth_day, birth_month, birth_year, student_id, seat):
         self.last_name = last_name
         self.first_name = first_name
         self.birth_day = birth_day
         self.birth_month = birth_month
         self.birth_year = birth_year
         self.student_id = student_id
-        self.seat = seat_list
+        self.seat = seat
 
-    def month(self, value):
+    def get_month_number(self) -> int | None:
         months = {
             'January': 1,
             'February': 2,
@@ -29,7 +29,8 @@ class Student:
         }
 
         for month, num in months.items():
-            if num == value:
-                return month
+            print(month)
+            if month == self.birth_month:
+                return num
 
-        return None
+        return self.birth_month
