@@ -93,15 +93,25 @@ class Detector(ABC):
 
     # Text-detection Functions
     def retrieve_data(self):
-        data = self.text_detection()
-        if data is None:
-            print('NOPE')
-        else:
-            for e in data:
-                if data[e] is None or data[e] == "":
-                    print(f'Could not read value of "{e}"')
+        # data = self.text_detection()
+        # if data is None:
+        #     print('NOPE')
+        # else:
+        #     for e in data:
+        #         if data[e] is None or data[e] == "":
+        #             print(f'Could not read value of "{e}"')
+        #
+        #     print(data)
 
-            print(data)
+        #Mockup:
+        return {
+            'firstname': 'DA SILVA GONCALVES',
+            'lastname': 'Joey',
+            'day': '03',
+            'month': 'May',
+            'year': '1997',
+            'student_id': '018109342'
+        }
 
     def minimised_area(self) -> Position | None:
         if self.card is None:
