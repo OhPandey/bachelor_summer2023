@@ -1,6 +1,3 @@
-import random
-
-
 class Student:
 
     def __init__(self, last_name, first_name, birth_day, birth_month, birth_year, student_id, seat):

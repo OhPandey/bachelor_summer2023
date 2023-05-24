@@ -14,7 +14,6 @@ class VideoCapture(Threading):
         self.width = int(self.capture.get(cv2.CAP_PROP_FRAME_WIDTH))
         self.height = int(self.capture.get(cv2.CAP_PROP_FRAME_HEIGHT))
         self.fps = int(self.capture.get(cv2.CAP_PROP_FPS))
-        self.delay = int(1000 / self.fps)
 
         self.frame = None
         self.process = process
