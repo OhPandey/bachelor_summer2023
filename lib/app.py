@@ -1,3 +1,5 @@
+import threading
+import time
 import tkinter as tk
 import cv2
 from PIL import Image, ImageTk
@@ -6,6 +8,7 @@ from lib.data.students import Students
 from lib.threads.gui import GUI
 from lib.threads.processing import Processing
 from lib.threads.capturing import VideoCapture
+
 
 
 class App:
@@ -18,8 +21,39 @@ class App:
         self.start_session()
 
     def start_session(self):
-        self.mainframe = GUI()
+        self.mainframe = GUI(self.students)
+        self.students.add_student({
+            "last_name": "DA SILVA GONCALVES VERRY LONG NAME HAHSA",
+            "first_name": "Joey",
+            "birth_day": "03",
+            "birth_month": "May",
+            "birth_year": "1997",
+            "student_id": "0181039342"
+        })
+        self.students.add_student({
+            "last_name": "ANOTHER LONG LANGE",
+            "first_name": "Joey",
+            "birth_day": "03",
+            "birth_month": "May",
+            "birth_year": "1997",
+            "student_id": "0181049342"
+        })
+        self.students.add_student({
+            "last_name": "WHATEVER",
+            "first_name": "Joey",
+            "birth_day": "03",
+            "birth_month": "May",
+            "birth_year": "1997",
+            "student_id": "0181049352"
+        })
+        self.lol = threading.Thread(target=self.meme_loop)
+        self.lol.start()
         self.mainframe.mainloop()
+
+    def meme_loop(self):
+        while True:
+            self.mainframe.students_list.update()
+            time.sleep(0.1)
 
     # def update(self):
     #     videoframe = self.video_stream.frame

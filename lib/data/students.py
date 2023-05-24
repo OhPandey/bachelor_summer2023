@@ -57,9 +57,9 @@ class Students:
         except IndexError:
             return False
 
-    def remove_student_by_id(self, student_by) -> bool:
+    def remove_student_by_id(self, student_id) -> bool:
         for i, x in enumerate(self.students):
-            if x.getId() == student_by:
+            if x.student_id == student_id:
                 self.remove_student_by_element(i)
                 return True
 
