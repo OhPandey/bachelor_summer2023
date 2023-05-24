@@ -1,7 +1,7 @@
 from console.Response.Response import Response
 
 
-# abstract Command class
+# abstract Command core
 class Command:
     response = Response()
 
@@ -9,7 +9,7 @@ class Command:
         pass
 
 
-# abstract CommandWithArguments class
+# abstract CommandWithArguments core
 class CommandWithArguments(Command):
     args = list()
 

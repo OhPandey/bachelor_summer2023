@@ -1,5 +1,5 @@
 from console.Command.Command import Command
-from data.Students import Students
+from core.students import Students
 
 
 class GetStudents(Command):
