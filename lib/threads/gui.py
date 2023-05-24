@@ -38,15 +38,18 @@ class GUI(customtkinter.CTk):
 
         self.capture_frame = customtkinter.CTkFrame(self)
         self.capture_frame.grid(row=0, column=1, padx=(20, 20), pady=(20, 20), sticky="nsew")
-        self.test_label = customtkinter.CTkLabel(self.capture_frame,
-                                                 text="Test",
-                                                 font=customtkinter.CTkFont(size=15, weight="bold"),
-                                                 justify="center"
-                                                 )
-        self.test_label.grid(row=0, column=1, padx=10, pady=20)
+        self.info_label = customtkinter.CTkLabel(self.capture_frame, text="{Info text}",
+                                                 font=customtkinter.CTkFont(size=20, weight="bold"),
+                                                 width=1200)
+        self.info_label.grid(row=0, column=0, padx=5, pady=(10, 10), sticky="")
 
     def button_event(self):
-        # Logic missing here
+        if self.entry.get() == "":
+            self.info_label.configure(text="Max seat is empty")
+            return
+        if not self.entry.get().isnumeric():
+            self.info_label.configure(text="Max seat has to be a number")
+            return
         print(self.entry.get())
 
 
