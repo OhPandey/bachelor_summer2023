@@ -1,10 +1,8 @@
 from abc import ABC, abstractmethod
-
+import re
 import cv2
 from easyocr import easyocr
 from finalisation.lib.state import State
-
-# import easyocr
 
 from finalisation.lib.position import Position
 
@@ -92,37 +90,21 @@ class Detector(ABC):
         return True
 
     # Text-detection Functions
+    @abstractmethod
     def retrieve_data(self):
-        # data = self.text_detection()
-        # if data is None:
-        #     print('NOPE')
-        # else:
-        #     for e in data:
-        #         if data[e] is None or data[e] == "":
-        #             print(f'Could not read value of "{e}"')
-        #
-        #     print(data)
-
-        #Mockup:
-        return {
-            'firstname': 'DA SILVA GONCALVES',
-            'lastname': 'Joey',
-            'day': '03',
-            'month': 'May',
-            'year': '1997',
-            'student_id': '018109342'
-        }
+        data = self._text_detection()
+        return data
 
     def minimised_area(self) -> Position | None:
         if self.card is None:
             return None
 
-        y1 = self.card.y1 + self.card.get_height(1/1.7)
-        x2 = self.card.x2 - self.card.get_width(1/2.5)
+        y1 = self.card.y1 + self.card.get_height(1 / 1.7)
+        x2 = self.card.x2 - self.card.get_width(1 / 2.5)
 
         return Position(self.card.x1, y1, x2, self.card.y2)
 
-    def text_detection(self):
+    def _text_detection(self):
         area = self.minimised_area()
 
         if area is None:
@@ -150,12 +132,12 @@ class Detector(ABC):
         if len(potential_results) < 3:
             return None
 
+        last_name = ""
+        first_name = ""
+        birth_day = None
+        birth_year = None
+        birth_month = None
         student_id = None
-        year = None
-        month = None
-        day = None
-        lastname = ""
-        firstname = ""
 
         for e in potential_results:
             if e.isnumeric() and len(e) == 10:
@@ -164,15 +146,14 @@ class Detector(ABC):
         if student_id is not None:
             potential_results.remove(student_id)
 
-        print(f"I found the following id: {student_id}")
-
         def is_year(value):
             return value.isnumeric() and len(value) == 4
 
         def is_month(value):
             months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October',
                       'November', 'December']
-            return not value.isnumeric() and value in months
+            pattern = r'^(?:' + '|'.join(months) + r')$'
+            return bool(re.match(pattern, value, re.IGNORECASE))
 
         def is_day(value):
             return value.isnumeric() and len(value) == 2
@@ -186,29 +167,29 @@ class Detector(ABC):
                     found = list()
                     for p in v:
                         if is_year(p):
-                            year = p
-                            found.append(year)
+                            birth_year = p
+                            found.append(birth_year)
                         if is_day(p):
-                            day = p
-                            found.append(day)
+                            birth_day = p
+                            found.append(birth_day)
                     for q in found:
                         v.remove(q)
 
                     if is_month(v[0]):
-                        month = v[0]
+                        birth_month = v[0]
 
                     values.append(e)
 
-            if is_year(e) and year is None:
-                year = e
+            if is_year(e) and birth_year is None:
+                birth_year = e
                 values.append(e)
 
-            if is_day(e) and day is None:
-                day = e
+            if is_day(e) and birth_day is None:
+                birth_day = e
                 values.append(e)
 
-            if is_month(e) and month is None:
-                month = e
+            if is_month(e) and birth_month is None:
+                birth_month = e
                 values.append(e)
 
         if len(values) >= 1:
@@ -219,21 +200,21 @@ class Detector(ABC):
             v = e.split()
             for p in v:
                 if p.isupper():
-                    lastname += " " + p
+                    last_name += " " + p
                 else:
-                    firstname += " " + p
+                    first_name += " " + p
 
-        if lastname != "":
-            lastname = lastname[1:]
+        if last_name != "":
+            last_name = last_name[1:]
 
-        if firstname != "":
-            firstname = firstname[1:]
+        if first_name != "":
+            first_name = first_name[1:]
 
         return {
-            'firstname': firstname,
-            'lastname': lastname,
-            'day': day,
-            'month': month,
-            'year': year,
+            'last_name': last_name,
+            'first_name': first_name,
+            'birth_day': birth_day,
+            'birth_month': birth_month,
+            'birth_year': birth_year,
             'student_id': student_id
         }

@@ -3,6 +3,7 @@ import tkinter as tk
 import cv2
 from PIL import Image, ImageTk
 
+from finalisation.data.students import Students
 from finalisation.processing import Processing
 from finalisation.capturing import VideoCapture
 
@@ -12,6 +13,7 @@ class App:
         self.analyzer = None
         self.videostream = None
         self.mainframe = None
+        self.students = Students(10)
         self.video_source = video_source
         self.start_components()
 
@@ -42,7 +44,7 @@ class App:
                 self.on_exit()
 
     def start_analyzer(self):
-        self.analyzer = Processing()
+        self.analyzer = Processing(self.students)
         self.analyzer.start()
 
     def start_videostream(self):

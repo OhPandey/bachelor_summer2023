@@ -9,6 +9,7 @@ from finalisation.lib.state import State
 # It checks the card in a normal non-machine learning approach
 # but takes advantage of the face recognition (that is easily available) to find the card position
 class HMLDetector(Detector):
+
     template = 'truetemplate.jpg'
 
     def check(self):
@@ -21,9 +22,12 @@ class HMLDetector(Detector):
         if self.card_check() is False:
             return 1
 
-        self.retrieve_data()
-
         return 2
+
+    def retrieve_data(self):
+        self.get_face()
+        self.card = self._transform_face_into_card()
+        return super().retrieve_data()
 
     def _find_features(self) -> int:
         template = cv2.imread(self.template, 0)
