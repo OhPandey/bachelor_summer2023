@@ -1,46 +1,37 @@
 import time
 
+import numpy
+
 from lib.data.students import Students
+from lib.detectors.detector import Detector
 from lib.detectors.hmldetector import HMLDetector
 from lib.utils.exceptions import AddingStudentError
 from lib.utils.threading import Threading
 
 
 class Processing(Threading):
-    def __init__(self, students: Students):
+    def __init__(self, students: Students, fps: int):
         super().__init__()
-        self.fps = None
-        self.buffer_size = 10
+        self.buffer_size = fps
         self.main_buffer = list()
-        self.overflow_buffer = list()
         self.students = students
         self.detection_option = 1
 
-    def start(self):
+    def start(self) -> None:
         super().start()
 
-    def set_fps(self, value):
-        self.fps = value
-
-    def stop(self):
+    def stop(self) -> None:
         super().stop()
 
-    def is_mainbufferfull(self):
+    def is_main_buffer_full(self) -> bool:
         return len(self.main_buffer) >= self.buffer_size
 
-    def is_overflowbufferfull(self):
-        return len(self.overflow_buffer) >= self.buffer_size
-
-    def flush(self):
+    def flush(self) -> None:
         self.main_buffer.clear()
-        self.main_buffer = self.overflow_buffer[-10:]
-        # if len(self.overflowbuffer) >= 10:
-        #    print(f"Frames dropped:{len(self.overflowbuffer) - 10}")
-        self.overflow_buffer.clear()
 
-    def _mainloop(self):
-        while self._running:
-            if self.is_mainbufferfull():
+    def _mainloop(self) -> None:
+        while self.is_running():
+            if self.is_main_buffer_full():
                 detector = self.get_detection(self.main_buffer[0])
                 if detector.check() == 2:
                     self._run()
@@ -48,11 +39,11 @@ class Processing(Threading):
             else:
                 time.sleep(0.1)
 
-    def get_detection(self, frame):
+    def get_detection(self, frame) -> Detector:
         if self.detection_option == 1:
             return HMLDetector(frame)
 
-    def _run(self):
+    def _run(self) -> None:
         detectors = list()
         for i in range(10):
             detectors.append(self.get_detection(self.main_buffer[i]))
@@ -75,8 +66,5 @@ class Processing(Threading):
             except AddingStudentError as error:
                 print(error)
 
-    def add_queue(self, e):
-        if not self.is_mainbufferfull():
-            self.main_buffer.append(e)
-        else:
-            self.overflow_buffer.append(e)
+    def add_queue(self, e: numpy) -> None:
+        self.main_buffer.append(e)

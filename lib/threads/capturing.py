@@ -1,11 +1,13 @@
 import cv2
 
+from lib.threads.processing import Processing
+from lib.utils.exceptions import CameraNotAvailable
 from lib.utils.threading import Threading
 
 
 class VideoCapture(Threading):
 
-    def __init__(self, process, video_source):
+    def __init__(self, process: Processing, video_source: int):
         super().__init__()
 
         self.video_source = video_source
@@ -17,16 +19,15 @@ class VideoCapture(Threading):
 
         self.frame = None
         self.process = process
-        self.process.set_fps(self.fps)
 
-    def start(self):
+    def start(self) -> None:
         super().start()
 
-    def stop(self):
+    def stop(self) -> None:
         super().stop()
         self.release()
 
-    def release(self):
+    def release(self) -> None:
         if self.capture:
             self.capture.release()
             self.capture = None
@@ -40,7 +41,7 @@ class VideoCapture(Threading):
             else:
                 self.stop()
                 self.process.stop()
-                break
+                raise CameraNotAvailable
 
     def __del__(self):
         self.release()

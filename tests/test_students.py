@@ -4,7 +4,7 @@ from lib.data.students import Students
 
 
 class TestStudents(unittest.TestCase):
-    def setUp(self) -> None:
+    def setUp(self):
         self.data = {
             "last_name": "Da Silva Goncalves Joey",
             "first_name": "Joey",

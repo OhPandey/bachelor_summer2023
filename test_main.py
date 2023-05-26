@@ -1,6 +1,6 @@
 import unittest
-from lib.tests.test_student import TestStudent
-from lib.tests.test_students import TestStudents
+from tests.test_student import TestStudent
+from tests.test_students import TestStudents
 
 if __name__ == '__main__':
     suite = unittest.TestSuite()
