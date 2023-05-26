@@ -8,7 +8,7 @@ from lib.detectors.detector import Detector
 from lib.threads.processing import Processing
 
 
-class TestProcess(unittest.TestCase):
+class TestProcessing(unittest.TestCase):
     def setUp(self):
         mock_students = mock.Mock(spec=Student)
         self.process = Processing(mock_students, 30)

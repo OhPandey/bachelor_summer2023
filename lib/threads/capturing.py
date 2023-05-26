@@ -5,7 +5,7 @@ from lib.utils.exceptions import CameraNotAvailable
 from lib.utils.threading import Threading
 
 
-class VideoCapture(Threading):
+class Capturing(Threading):
 
     def __init__(self, process: Processing, video_source: int):
         super().__init__()

@@ -7,7 +7,7 @@ from PIL import Image, ImageTk
 from lib.data.students import Students
 from lib.threads.gui import GUI
 from lib.threads.processing import Processing
-from lib.threads.capturing import VideoCapture
+from lib.threads.capturing import Capturing
 
 
 

@@ -17,5 +17,6 @@ class ThreadingError(Exception):
     def print_message(self):
         return self.message
 
+
 class CameraNotAvailable(Exception):
     pass
