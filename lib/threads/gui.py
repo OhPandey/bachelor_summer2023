@@ -63,10 +63,10 @@ class ScrollableLabelButtonFrame(customtkinter.CTkScrollableFrame):
         self.button_list = []
 
     def update(self):
-        diff = len(self.students.students) - len(self.label_list)
+        diff = len(self.students.students_list) - len(self.label_list)
         if diff > 0:
             for i in range(-diff, 0):
-                self.add_item(self.students.students[i])
+                self.add_item(self.students.students_list[i])
 
     def add_item(self, e):
         # As Python is doing call by reference by default, i have to cast it to call by value here.

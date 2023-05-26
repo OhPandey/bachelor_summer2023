@@ -12,8 +12,8 @@ from lib.utils.datasets import check_student_directory
 class Students:
     filename = "default-"+str(datetime.now().strftime("%y%m%d%H%M"))
 
-    def __init__(self, max_seat):
-        self.students = list()
+    def __init__(self, max_seat: int):
+        self.students_list = list()
         self.seat_list = list(range(max_seat))
 
     def add_student(self, data: dict):
@@ -32,13 +32,15 @@ class Students:
         self.seat_list.remove(val)
         data.update({"seat": val})
 
-        self.students.append(Student(**data))
+        self.students_list.append(Student(**data))
+
+        return True
 
     def get_max_seat(self) -> int:
         return len(self.seat_list)
 
     def is_duplicate(self, student_id) -> bool:
-        for k in self.students:
+        for k in self.students_list:
             if k.student_id == student_id:
                 return True
 
@@ -47,23 +49,23 @@ class Students:
     def remove_student_by_element(self, e: Student) -> bool:
         try:
             self.seat_list.append(e.seat)
-            self.students.remove(e)
+            self.students_list.remove(e)
             return True
         except ValueError:
             return False
 
-    def remove_by_id(self, i: int) -> bool:
+    def remove_student_by_index(self, i: int) -> bool:
         try:
-            self.seat_list.append(self.students[i])
-            self.students.pop(i)
+            self.seat_list.append(self.students_list[i])
+            self.students_list.pop(i)
             return True
         except IndexError:
             return False
 
-    def remove_student_by_id(self, student_id) -> bool:
-        for i, x in enumerate(self.students):
+    def remove_student_by_student_id(self, student_id) -> bool:
+        for i, x in enumerate(self.students_list):
             if x.student_id == student_id:
-                self.remove_student_by_element(self.students[i])
+                self.remove_student_by_index(i)
                 return True
 
         return False
@@ -76,7 +78,7 @@ class Students:
         pdf.add_page()
         pdf.set_font("Arial", size=15)
 
-        for i, x in enumerate(self.students):
+        for i, x in enumerate(self.students_list):
             if not isinstance(x, Student):
                 text = f"<Error retrieving student#{i}>"
             else:
@@ -95,7 +97,7 @@ class Students:
                 "Seat Number"
             ]
         ]
-        for student in self.students:
+        for student in self.students_list:
             data.append([
                 f"{student.last_name} {student.first_name}",
                 f"{student.birth_year}-{student.get_month_number()}-{student.birth_day}",
@@ -111,7 +113,7 @@ class Students:
 
         data = []
 
-        for student in self.students:
+        for student in self.students_list:
             data.append({
                 "Name": f"{student.last_name} {student.first_name}",
                 "Birthday": f"{student.birth_year}-{student.get_month_number()}-{student.birth_day}",

@@ -3,9 +3,9 @@ class Student:
     def __init__(self,
                  last_name: str,
                  first_name: str,
-                 birth_day: int,
-                 birth_month: str,
-                 birth_year: int,
+                 birth_day: int | str,
+                 birth_month: int | str,
+                 birth_year: int | str,
                  student_id: str,
                  seat):
         self.last_name = last_name
@@ -33,7 +33,6 @@ class Student:
         }
 
         for month, num in months.items():
-            print(month)
             if month == self.birth_month:
                 return num
 
