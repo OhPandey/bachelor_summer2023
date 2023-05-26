@@ -1,6 +1,13 @@
 class Student:
 
-    def __init__(self, last_name, first_name, birth_day, birth_month, birth_year, student_id, seat):
+    def __init__(self,
+                 last_name: str,
+                 first_name: str,
+                 birth_day: int,
+                 birth_month: str,
+                 birth_year: int,
+                 student_id: str,
+                 seat):
         self.last_name = last_name
         self.first_name = first_name
         self.birth_day = birth_day
