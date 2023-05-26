@@ -2,13 +2,14 @@ import random
 import json
 import csv
 
+from datetime import date
 from lib.data.student import Student
 from lib.utils.exceptions import AddingStudentError, MaxSeatError
 from fpdf import FPDF
 
 
 class Students:
-    filename = "default"
+    filename = "default-"+str(date.today())
 
     def __init__(self, max_seat):
         self.students = list()
@@ -25,7 +26,7 @@ class Students:
         if self.is_duplicate(data["student_id"]):
             raise AddingStudentError("The data given is a duplicate")
 
-        if len(self.seat_list) <= 0:
+        if self.get_max_seat() <= 0:
             raise MaxSeatError
 
         val = self.seat_list[random.randint(0, len(self.seat_list) - 1)]
@@ -43,6 +44,9 @@ class Students:
             )
         )
 
+    def get_max_seat(self) -> int:
+        return len(self.seat_list)
+
     def is_duplicate(self, student_id) -> bool:
         for k in self.students:
             if k.student_id == student_id:
@@ -50,9 +54,18 @@ class Students:
 
         return False
 
-    def remove_student_by_element(self, e) -> bool:
+    def remove_student_by_element(self, e: Student) -> bool:
         try:
-            self.students.pop(e)
+            self.seat_list.append(e.seat)
+            self.students.remove(e)
+            return True
+        except ValueError:
+            return False
+
+    def remove_by_id(self, i: int) -> bool:
+        try:
+            self.seat_list.append(self.students[i])
+            self.students.pop(i)
             return True
         except IndexError:
             return False
@@ -60,7 +73,7 @@ class Students:
     def remove_student_by_id(self, student_id) -> bool:
         for i, x in enumerate(self.students):
             if x.student_id == student_id:
-                self.remove_student_by_element(i)
+                self.remove_student_by_element(self.students[i])
                 return True
 
         return False
