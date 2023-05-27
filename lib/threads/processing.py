@@ -1,11 +1,11 @@
 import time
 import numpy
-
+import threading
 from lib.data.students import Students
 from lib.detectors.detector import Detector
 from lib.detectors.hmldetector import HMLDetector
 from lib.utils.exceptions import AddingStudentError
-from lib.utils.threading import Threading
+from lib.utils.threads import Threading
 
 
 class Processing(Threading):
@@ -41,6 +41,8 @@ class Processing(Threading):
                     self.flush()
                 else:
                     time.sleep(0.1)
+            else:
+                time.sleep(0.1)
 
     def get_detection(self, frame) -> Detector:
         if self.detection_option == 1:

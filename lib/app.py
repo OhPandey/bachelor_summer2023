@@ -23,10 +23,8 @@ class App:
         self.processing = Processing(self.students)
         self.processing.start()
 
-        self.capturing = Capturing(self.processing, 0)
+        self.capturing = Capturing(0)
         self.capturing.start()
-        self.capturing.stop()
+        self.capturing.add_processing(self.processing)
+        self.capturing.remove_processing()
 
-
-        self.mainframe = GUI(self.students)
-        self.mainframe.mainloop()
