@@ -1,5 +1,4 @@
 import time
-
 import numpy
 
 from lib.data.students import Students
@@ -10,9 +9,9 @@ from lib.utils.threading import Threading
 
 
 class Processing(Threading):
-    def __init__(self, students: Students, fps: int):
+    def __init__(self, students: Students):
         super().__init__()
-        self.buffer_size = fps
+        self.buffer_size = None
         self.main_buffer = list()
         self.students = students
         self.detection_option = 1
@@ -23,6 +22,9 @@ class Processing(Threading):
     def stop(self) -> None:
         super().stop()
 
+    def is_active(self):
+        return self.buffer_size is not None
+
     def is_main_buffer_full(self) -> bool:
         return len(self.main_buffer) >= self.buffer_size
 
@@ -31,13 +33,14 @@ class Processing(Threading):
 
     def _mainloop(self) -> None:
         while self.is_running():
-            if self.is_main_buffer_full():
-                detector = self.get_detection(self.main_buffer[0])
-                if detector.check() == 2:
-                    self._run()
-                self.flush()
-            else:
-                time.sleep(0.1)
+            if self.is_active():
+                if self.is_main_buffer_full():
+                    detector = self.get_detection(self.main_buffer[0])
+                    if detector.check() == 2:
+                        self._run()
+                    self.flush()
+                else:
+                    time.sleep(0.1)
 
     def get_detection(self, frame) -> Detector:
         if self.detection_option == 1:
@@ -67,4 +70,5 @@ class Processing(Threading):
                 print(error)
 
     def add_queue(self, e: numpy) -> None:
-        self.main_buffer.append(e)
+        if self.is_active():
+            self.main_buffer.append(e)

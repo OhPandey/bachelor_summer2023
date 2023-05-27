@@ -9,8 +9,6 @@ class Capturing(Threading):
 
     def __init__(self, process: Processing, video_source: int):
         super().__init__()
-
-        self.video_source = video_source
         self.capture = cv2.VideoCapture(video_source)
 
         self.width = int(self.capture.get(cv2.CAP_PROP_FRAME_WIDTH))
@@ -19,6 +17,7 @@ class Capturing(Threading):
 
         self.frame = None
         self.process = process
+        self.process.buffer_size = self.fps
 
     def start(self) -> None:
         super().start()
@@ -29,6 +28,7 @@ class Capturing(Threading):
 
     def release(self) -> None:
         if self.capture:
+            self.process.buffer_size = None
             self.capture.release()
             self.capture = None
 

@@ -1,30 +1,30 @@
+import configparser
 from abc import ABC, abstractmethod
 import re
 import cv2
 from easyocr import easyocr
-from lib.utils.state import State
 
 from lib.utils.position import Position
+
+config = configparser.ConfigParser()
+config.read('config.ini')
 
 
 class Detector(ABC):
     # Configuration
-    face_size = 80
-    face_offset = 20
-    card_width = 1 / 2
-    card_height = 1 / 2
-    state = State.DEVELOPMENT
-
-    # No Configuration
-    quality = None
-    frame = None
-    gray_frame = None
-    face = None
-    card = None
-    data = None
+    face_size = config.get('detector', 'face_size')
+    face_offset = config.get('detector', 'face_offset')
+    card_width = config.get('detector', 'card_width')
+    card_height = config.get('detector', 'card_height')
+    state = config.get('project', 'state')
 
     def __init__(self, frame):
         self.frame = frame
+        self.quality = None
+        self.frame = None
+        self.gray_frame = None
+        self.face = None
+        self.card = None
 
     @abstractmethod
     def check(self):

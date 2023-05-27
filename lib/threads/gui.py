@@ -86,7 +86,7 @@ class ScrollableLabelButtonFrame(customtkinter.CTkScrollableFrame):
     def remove_item(self, item, id):
         for label, button in zip(self.label_list, self.button_list):
             if item == label.cget("text"):
-                self.students.remove_student_by_id(id)
+                self.students.remove_student_by_student_id(id)
                 label.destroy()
                 button.destroy()
                 self.label_list.remove(label)
