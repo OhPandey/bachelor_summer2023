@@ -1,11 +1,15 @@
+import configparser
 import time
 import numpy
-import threading
+
 from lib.data.students import Students
 from lib.detectors.detector import Detector
 from lib.detectors.hmldetector import HMLDetector
 from lib.utils.exceptions import AddingStudentError
 from lib.utils.threads import Threading
+
+config = configparser.ConfigParser()
+config.read('config.ini')
 
 
 class Processing(Threading):

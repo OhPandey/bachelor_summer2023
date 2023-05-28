@@ -20,11 +20,8 @@ class App:
         self.start_session()
 
     def start_session(self):
-        self.processing = Processing(self.students)
-        self.processing.start()
-
         self.capturing = Capturing(0)
+        self.capturing.set_debugging(True)
         self.capturing.start()
-        self.capturing.add_processing(self.processing)
-        self.capturing.remove_processing()
+        self.capturing.stop()
 

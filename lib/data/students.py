@@ -6,7 +6,7 @@ from datetime import datetime
 from lib.data.student import Student
 from lib.utils.exceptions import AddingStudentError, MaxSeatError
 from fpdf import FPDF
-from lib.utils.datasets import check_student_directory
+from lib.data.datasets import check_student_directory
 
 
 class Students:

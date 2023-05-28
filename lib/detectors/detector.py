@@ -16,7 +16,7 @@ class Detector(ABC):
     face_offset = config.get('detector', 'face_offset')
     card_width = config.get('detector', 'card_width')
     card_height = config.get('detector', 'card_height')
-    state = config.get('project', 'state')
+    state = 1
 
     def __init__(self, frame):
         self.frame = frame
