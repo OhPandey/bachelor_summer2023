@@ -5,6 +5,7 @@ import cv2
 from PIL import Image, ImageTk
 
 from lib.data.students import Students
+from lib.debugging.log import delete_log_all
 from lib.threads.gui import GUI
 from lib.threads.processing import Processing
 from lib.threads.capturing import Capturing
@@ -20,8 +21,8 @@ class App:
         self.start_session()
 
     def start_session(self):
-        self.capturing = Capturing(0)
-        self.capturing.set_debugging(True)
-        self.capturing.start()
-        self.capturing.stop()
+        self.processing = Processing(self.students)
+        self.processing.set_debugging(True)
+        self.processing.start()
+        self.processing.stop()
 

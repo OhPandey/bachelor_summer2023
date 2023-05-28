@@ -1,20 +1,19 @@
-import configparser
 import time
 import numpy
 
 from lib.data.students import Students
+from lib.debugging.debugging import Debugging
+from lib.debugging.subdirectory import Subdirectory
 from lib.detectors.detector import Detector
 from lib.detectors.hmldetector import HMLDetector
 from lib.utils.exceptions import AddingStudentError
 from lib.utils.threads import Threading
 
-config = configparser.ConfigParser()
-config.read('config.ini')
 
-
-class Processing(Threading):
+class Processing(Threading, Debugging):
     def __init__(self, students: Students):
-        super().__init__()
+        Threading.__init__(self)
+        Debugging.__init__(self, Subdirectory.PROCESSING)
         self.buffer_size = None
         self.main_buffer = list()
         self.students = students
@@ -67,7 +66,7 @@ class Processing(Threading):
 
         data = detectors[index].retrieve_data()
         if data is None:
-            print("Impossible to read the data.")
+            self.log("Data could not be read")
         else:
             try:
                 print(data)

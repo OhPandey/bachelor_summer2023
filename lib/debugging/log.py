@@ -27,3 +27,8 @@ def delete_log(sub: Subdirectory):
             os.remove(file_path(sub))
     except ValueError:
         return
+
+
+def delete_log_all():
+    for e in Subdirectory:
+        delete_log(e)
