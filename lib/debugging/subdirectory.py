@@ -7,3 +7,4 @@ class Subdirectory(Enum):
     GUI = 'gui'
     DETECTOR = 'detector'
     APPLICATION = 'application'
+    CONFIG = 'config'
