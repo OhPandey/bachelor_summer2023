@@ -78,11 +78,11 @@ class Capturing(Threading, Debugging, Component):
     def _mainloop(self) -> None:
         while self._running:
             if self.is_active():
-                ret, frame = self._capture.read()
+                ret, frame = self.capture.read()
                 if ret:
-                    self._capture_frame = frame
+                    self.capture_frame = frame
                     if self.is_processing():
-                        self.processing.add_queue(self._capture_frame)
+                        self.processing.add_queue(self.capture_frame)
                 else:
                     del self.capture
                     self.log("Lost camera connection")
