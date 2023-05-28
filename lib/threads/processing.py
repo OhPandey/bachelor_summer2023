@@ -36,6 +36,10 @@ class Processing(Threading, Debugging, Component):
     def main_buffer(self):
         return self._main_buffer
 
+    @main_buffer.deleter
+    def main_buffer(self):
+        self._main_buffer.clear()
+
     def start(self) -> None:
         super().start()
 
@@ -56,7 +60,8 @@ class Processing(Threading, Debugging, Component):
                     detector = self.get_detection(self._main_buffer[0])
                     if detector.check() == 2:
                         self._run()
-                    self._main_buffer.clear()
+
+                    del self._main_buffer
                 else:
                     time.sleep(0.1)
             else:
