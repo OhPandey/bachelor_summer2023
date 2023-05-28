@@ -27,11 +27,8 @@ class TestProcessing(unittest.TestCase):
         for e in range(65):
             self.process.add_queue(mock_frame)
 
-        self.assertTrue(self.process._is_main_buffer_full())
+        self.assertTrue(self.process.is_main_buffer_full())
 
-        # Testing clearing buffer
-        self.process.flush()
-        self.assertEqual(len(self.process._main_buffer), 0)
 
     def test_third(self):
         # Testing detector

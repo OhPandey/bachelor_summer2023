@@ -32,6 +32,10 @@ class Processing(Threading, Debugging, Component):
     def buffer_size(self):
         self._buffer_size = -1
 
+    @property
+    def main_buffer(self):
+        return self._main_buffer
+
     def start(self) -> None:
         super().start()
 
@@ -41,13 +45,13 @@ class Processing(Threading, Debugging, Component):
     def is_active(self):
         return self.buffer_size != -1
 
-    def _is_main_buffer_full(self) -> bool:
+    def is_main_buffer_full(self) -> bool:
         return len(self._main_buffer) >= self.buffer_size
 
     def _mainloop(self) -> None:
         while self.is_running():
             if self.is_active():
-                if self._is_main_buffer_full():
+                if self.is_main_buffer_full():
                     self.mediator.update('1')
                     detector = self.get_detection(self._main_buffer[0])
                     if detector.check() == 2:
