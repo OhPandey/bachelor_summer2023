@@ -29,39 +29,33 @@ class Processing(Threading, Debugging, Component):
         self._buffer_size = buffer_size
 
     @buffer_size.deleter
-    def buffer_size(self):
+    def buffer_size(self) -> None:
         self._buffer_size = -1
 
     @property
-    def main_buffer(self):
+    def main_buffer(self) -> list:
         return self._main_buffer
 
     @main_buffer.deleter
-    def main_buffer(self):
+    def main_buffer(self) -> None:
         self._main_buffer.clear()
-
-    def start(self) -> None:
-        super().start()
-
-    def stop(self) -> None:
-        super().stop()
 
     def is_active(self):
         return self.buffer_size != -1
 
     def is_main_buffer_full(self) -> bool:
-        return len(self._main_buffer) >= self.buffer_size
+        return len(self.main_buffer) >= self.buffer_size
 
     def _mainloop(self) -> None:
         while self.is_running():
             if self.is_active():
                 if self.is_main_buffer_full():
                     self.mediator.update('1')
-                    detector = self.get_detection(self._main_buffer[0])
+                    detector = self.get_detection(self.main_buffer[0])
                     if detector.check() == 2:
                         self._run()
 
-                    del self._main_buffer
+                    del self.main_buffer
                 else:
                     time.sleep(0.1)
             else:
@@ -74,7 +68,7 @@ class Processing(Threading, Debugging, Component):
     def _run(self) -> None:
         detectors = list()
         for i in range(10):
-            detectors.append(self.get_detection(self._main_buffer[i]))
+            detectors.append(self.get_detection(self.main_buffer[i]))
 
         highest_quality = 0
         index = 0
@@ -96,4 +90,10 @@ class Processing(Threading, Debugging, Component):
 
     def add_queue(self, e: numpy) -> None:
         if self.is_active():
-            self._main_buffer.append(e)
+            self.main_buffer.append(e)
+
+    def start(self) -> None:
+        super().start()
+
+    def stop(self) -> None:
+        super().stop()

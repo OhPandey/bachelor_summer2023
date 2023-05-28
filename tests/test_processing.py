@@ -30,7 +30,7 @@ class TestProcessing(unittest.TestCase):
         self.assertTrue(self.process.is_main_buffer_full())
 
         # Testing clearing buffer
-        del self.process.main_buffer
+        del self.process._main_buffer
         self.assertEqual(len(self.process._main_buffer), 0)
 
     def test_third(self):

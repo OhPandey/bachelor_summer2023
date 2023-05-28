@@ -10,55 +10,52 @@ from lib.utils.threads import Threading
 
 
 class Capturing(Threading, Debugging, Component):
-    processing: "Processing | None" = None
-    capture: "VideoCapture | None" = None
-    capture_frame: "numpy | None" = None
+    _capture: "VideoCapture | None" = None
+    _capture_frame: "numpy | None" = None
+    _processing: "Processing | None" = None
 
-    width: "int | None" = None
-    height: "int | None" = None
-    fps: "int | None" = None
+    width: int = None
+    height: int = None
+    fps: int = None
 
     def __init__(self, channel: int):
         Threading.__init__(self)
         Debugging.__init__(self, Subdirectory.CAPTURING)
-        self.add_capture(channel)
+        self.capture = channel
 
-    def start(self) -> None:
-        super().start()
+    @property
+    def capture(self):
+        return self._capture
 
-    def stop(self) -> None:
-        super().stop()
-        self.release()
-
-    def add_capture(self, channel) -> None:
-        self.capture = cv2.VideoCapture(channel)
+    @capture.setter
+    def capture(self, channel: int) -> None:
+        self._capture = cv2.VideoCapture(channel)
         if self.capture.isOpened():
             self.width = int(self.capture.get(cv2.CAP_PROP_FRAME_WIDTH))
             self.height = int(self.capture.get(cv2.CAP_PROP_FRAME_HEIGHT))
             self.fps = int(self.capture.get(cv2.CAP_PROP_FPS))
-            print(self.fps)
         else:
-            self.capture = None
-            self.width = None
-            self.height = None
-            self.fps = None
-            self.log(f"add_capture(): Camera on channel {channel} not found")
+            del self.capture
             raise CameraNotAvailable
 
-    def remove_capture(self) -> None:
+    @capture.deleter
+    def capture(self) -> None:
         if self.capture:
             self.capture.release()
-        else:
-            self.log("remove_capture(): There was no capture running")
-        self.capture = None
-        self.width = None
-        self.height = None
-        self.fps = None
+        self._capture = None
+        self.width = -1
+        self.height = -1
+        self.fps = -1
 
     def is_active(self) -> bool:
         return self.capture is not None
 
-    def add_processing(self, processing: Processing) -> None:
+    @property
+    def processing(self) -> Processing | None:
+        return self._processing
+
+    @processing.setter
+    def processing(self, processing: Processing) -> None:
         if self.processing is not None:
             self.log(f"add_processing(): Processing is already assigned")
             raise ProcessingNotAvailableError()
@@ -66,37 +63,45 @@ class Capturing(Threading, Debugging, Component):
         self.processing = processing
         self.processing.buffer_size = self.fps
 
-    def remove_processing(self) -> None:
+    @processing.deleter
+    def processing(self) -> None:
         if self.processing is None:
             self.log(f"remove_processing(): Tried to remove an empty processing")
             raise ProcessingNotAvailableError()
 
         del self.processing.buffer_size
-        self.processing = None
+        self._processing = None
 
-    def has_processing(self):
+    def is_processing(self):
         return self.processing is not None
 
     def _mainloop(self) -> None:
         while self._running:
-            self.log("Test.")
             if self.is_active():
-                ret, frame = self.capture.read()
+                ret, frame = self._capture.read()
                 if ret:
-                    self.capture_frame = frame
-                    if self.has_processing():
-                        self.processing.add_queue(self.capture_frame)
+                    self._capture_frame = frame
+                    if self.is_processing():
+                        print('Yes')
+                        self.processing.add_queue(self._capture_frame)
                 else:
-                    self.remove_capture()
+                    del self.capture
                     self.log("Lost camera connection")
             else:
                 time.sleep(0.1)
 
     def release(self) -> None:
-        if self.processing is not None:
-            self.remove_processing()
-        if self.capture is not None:
-            self.remove_capture()
+        if self.is_processing():
+            del self.processing
+        if self.is_active():
+            del self.capture
+
+    def start(self) -> None:
+        super().start()
+
+    def stop(self) -> None:
+        super().stop()
+        self.release()
 
     def __del__(self):
         self.release()

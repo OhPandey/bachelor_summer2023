@@ -21,11 +21,11 @@ class TestCapture(unittest.TestCase):
 
     def test_second(self):
         # Testing the capture
-        self.assertIsInstance(self.capturing.capture, VideoCapture)
-        self.assertTrue(self.capturing.capture.isOpened())
+        self.assertIsInstance(self.capturing._capture, VideoCapture)
+        self.assertTrue(self.capturing._capture.isOpened())
 
     def test_third(self):
         # Testing the processing
         self.capturing.add_processing(mock.Mock(spec=Processing))
-        self.assertTrue(self.capturing.has_processing())
-        self.assertIsInstance(self.capturing.processing, Processing)
+        self.assertTrue(self.capturing._has_processing())
+        self.assertIsInstance(self.capturing._processing, Processing)
