@@ -71,7 +71,7 @@ class Capturing(Threading, Debugging, Component):
             self.log(f"remove_processing(): Tried to remove an empty processing")
             raise ProcessingNotAvailableError()
 
-        self.processing.buffer_size = None
+        del self.processing.buffer_size
         self.processing = None
 
     def has_processing(self):
