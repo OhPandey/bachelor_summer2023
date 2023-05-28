@@ -30,7 +30,7 @@ class App(Mediator):
         self.capturing.mediator = self
 
     def start_session(self) -> None:
-        self.capturing._processing = self.processing
+        self.capturing.processing = self.processing
         self.processing.start()
         self.capturing.start()
         self.mainframe.mainloop()

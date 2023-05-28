@@ -30,7 +30,7 @@ class Capturing(Threading, Debugging, Component):
     @capture.setter
     def capture(self, channel: int) -> None:
         self._capture = cv2.VideoCapture(channel)
-        if self.capture.isOpened():
+        if self._capture.isOpened():
             self.width = int(self.capture.get(cv2.CAP_PROP_FRAME_WIDTH))
             self.height = int(self.capture.get(cv2.CAP_PROP_FRAME_HEIGHT))
             self.fps = int(self.capture.get(cv2.CAP_PROP_FPS))
@@ -40,8 +40,8 @@ class Capturing(Threading, Debugging, Component):
 
     @capture.deleter
     def capture(self) -> None:
-        if self.capture:
-            self.capture.release()
+        if self._capture:
+            self._capture.release()
         self._capture = None
         self.width = -1
         self.height = -1
@@ -56,16 +56,16 @@ class Capturing(Threading, Debugging, Component):
 
     @processing.setter
     def processing(self, processing: Processing) -> None:
-        if self.processing is not None:
+        if self._processing is not None:
             self.log(f"add_processing(): Processing is already assigned")
             raise ProcessingNotAvailableError()
 
-        self.processing = processing
-        self.processing.buffer_size = self.fps
+        self._processing = processing
+        self._processing.buffer_size = self.fps
 
     @processing.deleter
     def processing(self) -> None:
-        if self.processing is None:
+        if self._processing is None:
             self.log(f"remove_processing(): Tried to remove an empty processing")
             raise ProcessingNotAvailableError()
 
@@ -82,7 +82,6 @@ class Capturing(Threading, Debugging, Component):
                 if ret:
                     self._capture_frame = frame
                     if self.is_processing():
-                        print('Yes')
                         self.processing.add_queue(self._capture_frame)
                 else:
                     del self.capture
