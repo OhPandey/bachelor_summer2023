@@ -4,6 +4,7 @@ import os
 import cv2
 from PIL import Image
 
+from lib.debugging.debugging import Debugging
 from lib.detectors.detector import Detector
 from lib.data.datasets import OPENCV_SUPPORTED_IMREAD_FORMATS
 from lib.utils.position import Position
@@ -15,7 +16,7 @@ config.read('config.ini')
 # This is a mix of machine learning and non-machine learning approach (Half machine-learning - HML)
 # It checks the card in a normal non-machine learning approach
 # but takes advantage of the face recognition (that is easily available) to find the card position
-class HMLDetector(Detector):
+class HMLDetector(Detector, Debugging):
     template = "test.jpg"
 
     def check(self):
@@ -76,9 +77,7 @@ class HMLDetector(Detector):
                         goodMatches.append(m)
                 except ValueError:
                     pass
-
-                if self.state == "debugging":
-                    print(len(goodMatches))
+                print(len(goodMatches))
 
             return len(goodMatches)
 

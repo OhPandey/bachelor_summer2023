@@ -1,6 +1,6 @@
 from abc import ABC
 
-from lib.debugging.config import *
+from lib.debugging.config import get_config, change_config, write_config
 from lib.debugging.log import write_log
 from lib.debugging.subdirectory import Subdirectory
 
@@ -10,7 +10,7 @@ class Debugging(ABC):
     option: Subdirectory
 
     def __init__(self, option: Subdirectory):
-        value = config.get('debugging', option.value)
+        value = get_config('debugging', option.value)
         if value == "True":
             self.debugging = True
         self.option = option

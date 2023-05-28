@@ -10,8 +10,7 @@ from lib.threads.processing import Processing
 class TestCapture(unittest.TestCase):
 
     def setUp(self):
-        mock_process = mock.Mock(spec=Processing)
-        self.capturing = Capturing(mock_process, 1)
+        self.capturing = Capturing(1)
 
     def test_first(self):
         # Testing the runtime
@@ -27,4 +26,6 @@ class TestCapture(unittest.TestCase):
 
     def test_third(self):
         # Testing the processing
-        self.assertIsInstance(self.capturing.process, Processing)
+        self.capturing.add_processing(mock.Mock(spec=Processing))
+        self.assertTrue(self.capturing.has_processing())
+        self.assertIsInstance(self.capturing.processing, Processing)

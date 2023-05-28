@@ -11,7 +11,8 @@ from lib.threads.processing import Processing
 class TestProcessing(unittest.TestCase):
     def setUp(self):
         mock_students = mock.Mock(spec=Student)
-        self.process = Processing(mock_students, 30)
+        self.process = Processing(mock_students)
+        self.process.buffer_size = 60
 
     def test_first(self):
         # Testing the runtime

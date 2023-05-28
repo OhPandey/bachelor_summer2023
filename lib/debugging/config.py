@@ -1,7 +1,12 @@
 import configparser
+import os
+
+# Absolute pathing
+script_path = os.path.abspath(__file__)
+config_file_path = os.path.join(script_path, '../../../config.ini')
 
 config = configparser.ConfigParser()
-config.read('config.ini')
+config.read(config_file_path)
 
 
 def get_config(section: str, option: str) -> str:
