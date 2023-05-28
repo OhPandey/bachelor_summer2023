@@ -15,45 +15,48 @@ class GUI(customtkinter.CTk):
         self.grid_columnconfigure(1, weight=1)
         self.grid_rowconfigure(0, weight=1)
 
-        # create sidebar frame with widgets
+        # Side frame
         self.sidebar_frame = customtkinter.CTkFrame(self, width=140, corner_radius=1)
         self.sidebar_frame.grid(row=0, column=0, rowspan=4, sticky="nsew")
         self.sidebar_frame.grid_rowconfigure(4, weight=1)
-        self.logo_label = customtkinter.CTkLabel(self.sidebar_frame, text="List of students",
+        self.list_label = customtkinter.CTkLabel(self.sidebar_frame, text="List of students",
                                                  font=customtkinter.CTkFont(size=15, weight="bold"))
-        self.logo_label.grid(row=0, column=0, padx=5, pady=(10, 10))
+        self.list_label.grid(row=0, column=0, padx=5, pady=(10, 10))
         self.students_list = ScrollableLabelButtonFrame(master=self.sidebar_frame,
                                                         students=self.students,
                                                         width=250, height=600,
                                                         corner_radius=0)
         self.students_list.grid(row=1, column=0, padx=0, pady=0, sticky="nsew")
-        self.max_seat_label = customtkinter.CTkLabel(self.sidebar_frame, text="Max seat:", justify="left",
+        self.max_seat_label = customtkinter.CTkLabel(self.sidebar_frame, text="How many seats?", justify="left",
                                                      font=customtkinter.CTkFont(size=15, weight="bold"))
         self.max_seat_label.grid(row=2, column=0, padx=20, pady=(10, 0))
 
-        self.entry = customtkinter.CTkEntry(self.sidebar_frame, placeholder_text="CTkEntry", width=180)
-        self.entry.grid(row=3, column=0, padx=10, pady=20, sticky="w")
-        self.main_button = customtkinter.CTkButton(self.sidebar_frame, text="Change", width=50, command=self.button_event)
+        self.max_seat_button = customtkinter.CTkEntry(self.sidebar_frame, placeholder_text="Number", width=180)
+        self.max_seat_button.grid(row=3, column=0, padx=10, pady=20, sticky="w")
+        self.main_button = customtkinter.CTkButton(self.sidebar_frame, text="Set", width=50,
+                                                   command=self.max_set_button_event)
         self.main_button.grid(row=3, column=0, padx=10, pady=20, sticky="e")
 
+        # Main frame
         self.capture_frame = customtkinter.CTkFrame(self)
         self.capture_frame.grid(row=0, column=1, padx=(20, 20), pady=(20, 20), sticky="nsew")
-        self.info_label = customtkinter.CTkLabel(self.capture_frame, text="{Info text}",
+        self.info_label = customtkinter.CTkLabel(self.capture_frame, text="",
                                                  font=customtkinter.CTkFont(size=20, weight="bold"),
                                                  width=1200)
         self.info_label.grid(row=0, column=0, padx=5, pady=(10, 10), sticky="")
 
-    def button_event(self):
-        if self.entry.get() == "":
-            self.info_label.configure(text="Max seat is empty")
+    def max_set_button_event(self):
+        if self.max_seat_button.get() == "":
             return
-        if not self.entry.get().isnumeric():
+        if not self.max_seat_button.get().isnumeric():
             self.info_label.configure(text="Max seat has to be a number")
             return
-        print(self.entry.get())
+        self.info_label.configure(text=f"Max seat set to {self.max_seat_button.get()}")
+        self.students.set_seat_list(int(self.max_seat_button.get()))
 
 
 class ScrollableLabelButtonFrame(customtkinter.CTkScrollableFrame):
+    # Doing this frame with customtkinter wasn't easy. Had to find a lot of workarounds
     def __init__(self, master, students, command=None, **kwargs):
         super().__init__(master, **kwargs)
         self.grid_columnconfigure(0, weight=1)
@@ -63,15 +66,16 @@ class ScrollableLabelButtonFrame(customtkinter.CTkScrollableFrame):
         self.button_list = []
 
     def update(self):
-        diff = len(self.students.students_list) - len(self.label_list)
-        if diff > 0:
-            for i in range(-diff, 0):
-                self.add_item(self.students.students_list[i])
+        print('Update has been requested.')
+        if self.students.is_seat_list():
+            diff = len(self.students.students_list) - len(self.label_list)
+            if diff > 0:
+                for i in range(-diff, 0):
+                    self.add_item(self.students.students_list[i])
 
     def add_item(self, e):
-        # As Python is doing call by reference by default, i have to cast it to call by value here.
         text = f"Seat: {e.seat}\n{e.student_id}\n{e.last_name}"
-        id = e.student_id
+        student_id = e.student_id
         label = customtkinter.CTkLabel(self, text=text,
                                        compound="left",
                                        padx=5, justify="left", anchor="w")
@@ -79,14 +83,14 @@ class ScrollableLabelButtonFrame(customtkinter.CTkScrollableFrame):
         button = customtkinter.CTkButton(self, text="Remove", width=50, height=50)
         button.grid(row=len(self.button_list), column=1, pady=(0, 10), padx=5)
         button.configure(
-            command=lambda: self.remove_item(text, id))
+            command=lambda: self.remove_item(text, student_id))
         self.label_list.append(label)
         self.button_list.append(button)
 
-    def remove_item(self, item, id):
+    def remove_item(self, item, student_id):
         for label, button in zip(self.label_list, self.button_list):
             if item == label.cget("text"):
-                self.students.remove_student_by_student_id(id)
+                self.students.remove_student_by_student_id(student_id)
                 label.destroy()
                 button.destroy()
                 self.label_list.remove(label)

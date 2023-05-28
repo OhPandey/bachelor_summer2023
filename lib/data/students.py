@@ -12,9 +12,9 @@ from lib.data.datasets import check_student_directory
 class Students:
     filename = "default-"+str(datetime.now().strftime("%y%m%d%H%M"))
 
-    def __init__(self, max_seat: int):
+    def __init__(self):
         self.students_list = list()
-        self.seat_list = list(range(max_seat))
+        self.seat_list = None
 
     def add_student(self, data: dict):
 
@@ -37,7 +37,15 @@ class Students:
         return True
 
     def get_max_seat(self) -> int:
+        if self.seat_list is None:
+            return 0
         return len(self.seat_list)
+
+    def is_seat_list(self) -> bool:
+        return self.seat_list is not None
+
+    def set_seat_list(self, size: int) -> None:
+        self.seat_list = list(range(size))
 
     def is_duplicate(self, student_id) -> bool:
         for k in self.students_list:

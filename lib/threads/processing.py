@@ -6,11 +6,12 @@ from lib.debugging.debugging import Debugging
 from lib.debugging.subdirectory import Subdirectory
 from lib.detectors.detector import Detector
 from lib.detectors.hmldetector import HMLDetector
+from lib.mediator.component import Component
 from lib.utils.exceptions import AddingStudentError
 from lib.utils.threads import Threading
 
 
-class Processing(Threading, Debugging):
+class Processing(Threading, Debugging, Component):
     def __init__(self, students: Students):
         Threading.__init__(self)
         Debugging.__init__(self, Subdirectory.PROCESSING)
@@ -38,6 +39,7 @@ class Processing(Threading, Debugging):
         while self.is_running():
             if self.is_active():
                 if self.is_main_buffer_full():
+                    self.mediator.update('1')
                     detector = self.get_detection(self.main_buffer[0])
                     if detector.check() == 2:
                         self._run()
