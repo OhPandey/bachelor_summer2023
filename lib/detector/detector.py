@@ -13,10 +13,10 @@ class Detector(ABC):
     face_offset = 20
     card_width = 0.5
     card_height = 0.5
+
     def __init__(self, frame):
         self.frame = frame
         self.quality = None
-        self.frame = None
         self.gray_frame = None
         self.face = None
         self.card = None
@@ -135,11 +135,10 @@ class Detector(ABC):
         student_id = None
 
         for e in potential_results:
-            if e.isnumeric() and len(e) == 10:
-                student_id = e
-
-        if student_id is not None:
-            potential_results.remove(student_id)
+            match = re.search(r"\d{9}", e)
+            if match:
+                student_id = match.group()
+                potential_results.remove(e)
 
         def is_year(value):
             return value.isnumeric() and len(value) == 4

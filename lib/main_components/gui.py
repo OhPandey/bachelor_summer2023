@@ -41,7 +41,7 @@ class GUI(customtkinter.CTk):
         # Maximum Seat Input Widget
         self.max_seat_input = customtkinter.CTkEntry(self.sidebar_frame,
                                                      placeholder_text="Type your number here",
-                                                     width=200)
+                                                     width=190)
         self.max_seat_input.grid(row=3, column=0, padx=10, pady=20, sticky="w")
         # Maximum Seat Button Widget
         self.max_seat_button = customtkinter.CTkButton(self.sidebar_frame,
@@ -81,11 +81,12 @@ class GUI(customtkinter.CTk):
         if not self.max_seat_input.get().isnumeric():
             self.info_label.configure(text="Max seat has to be a number")
             return
-        self.max_seat_label.configure(text=f"{self.max_seat_input.get()} Available")
-        self.info_label.configure(text=f"Max seat set to {self.max_seat_input.get()}")
+        seat_number = int(self.max_seat_input.get())
+        self.max_seat_label.configure(text=f"{str(seat_number)} Available")
+        self.info_label.configure(text=f"Max seat set to {str(seat_number)}")
         self.max_seat_button.configure(state="disabled")
         self.max_seat_input.configure(state="disabled")
-        self.students.seat_list = int(self.max_seat_input.get())
+        self.students.seat_list = seat_number
 
 
 class ScrollableLabelButtonFrame(customtkinter.CTkScrollableFrame):

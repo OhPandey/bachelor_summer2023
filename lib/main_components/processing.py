@@ -6,11 +6,12 @@ from lib.debugging.debugging import Debugging
 from lib.debugging.subdirectory import Subdirectory
 from lib.detector.detector import Detector
 from lib.detector.hmldetector import HMLDetector
-from lib.utils.exceptions import AddingStudentError
+from lib.interfaces.mediator.component import Component
+from lib.utils.exceptions import AddingStudentError, MaxSeatError
 from lib.interfaces.thread.thread import Thread
 
 
-class Processing(Thread, Debugging):
+class Processing(Thread, Debugging, Component):
     def __init__(self, students: Students):
         Thread.__init__(self)
         Debugging.__init__(self, Subdirectory.PROCESSING)
@@ -50,7 +51,9 @@ class Processing(Thread, Debugging):
             if self.is_active():
                 if self.is_main_buffer_full():
                     detector = self.get_detection(self.main_buffer[0])
-                    if detector.check() == 2:
+                    check = detector.check()
+                    print(check)
+                    if check == 0:
                         self._run()
 
                     del self.main_buffer
@@ -78,13 +81,17 @@ class Processing(Thread, Debugging):
 
         data = detectors[index].retrieve_data()
         if data is None:
+            self.mediator.set_response("Data could not be read")
             self.log("Data could not be read")
         else:
             try:
                 print(data)
                 self._students.students_list = data
+                self.mediator.set_response(f"{data.last_name} has been added")
             except AddingStudentError as error:
-                print(error)
+                self.mediator.set_response(f"{error} ")
+            except MaxSeatError as error:
+                self.mediator.set_response(f"{error} ")
 
     def add_queue(self, e: numpy) -> None:
         if self.is_active():
