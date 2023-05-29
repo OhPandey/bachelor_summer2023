@@ -1,12 +1,14 @@
+import os
 import tkinter
 import tkinter.messagebox
 import customtkinter
+import cv2
+from PIL import Image, ImageTk
 
 
 class GUI(customtkinter.CTk):
     def __init__(self, students):
         super().__init__()
-
         self.students = students
         # configure window
         self.title("Student Card Scanner.py")
@@ -40,10 +42,23 @@ class GUI(customtkinter.CTk):
         # Main frame
         self.capture_frame = customtkinter.CTkFrame(self)
         self.capture_frame.grid(row=0, column=1, padx=(20, 20), pady=(20, 20), sticky="nsew")
-        self.info_label = customtkinter.CTkLabel(self.capture_frame, text="",
+        self.info_label = customtkinter.CTkLabel(self.capture_frame, text="Test",
                                                  font=customtkinter.CTkFont(size=20, weight="bold"),
                                                  width=1200)
         self.info_label.grid(row=0, column=0, padx=5, pady=(10, 10), sticky="")
+        # image_path = os.path.join(os.path.dirname(os.path.realpath(__file__)))
+        self.large_test_image = customtkinter.CTkImage(Image.open('video-not-working.png'), size=(1000, 500))
+        self.home_frame_large_image_label = customtkinter.CTkLabel(self.capture_frame, text="",
+                                                                   image=self.large_test_image)
+        self.home_frame_large_image_label.grid(row=1, column=0, padx=20, pady=10)
+
+    def stream(self, capture):
+        if capture is not None:
+            img = Image.fromarray(cv2.cvtColor(capture, cv2.COLOR_BGR2RGB))
+
+            de = customtkinter.CTkImage(img, size=(self.capture_frame.winfo_width()-100, self.capture_frame.winfo_height()-100))
+
+            self.home_frame_large_image_label.configure(image=de)
 
     def max_set_button_event(self):
         if self.max_seat_button.get() == "":
@@ -65,7 +80,7 @@ class ScrollableLabelButtonFrame(customtkinter.CTkScrollableFrame):
         self.label_list = []
         self.button_list = []
 
-    def update(self):
+    def update_students(self):
         if self.students.is_seat_list():
             diff = len(self.students.students_list) - len(self.label_list)
             if diff > 0:

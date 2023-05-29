@@ -1,35 +1,28 @@
 from lib.data.students import Students
-from lib.interfaces.mediator.mediator import Mediator
 from lib.main_components.gui import GUI
 from lib.main_components.processing import Processing
 from lib.main_components.capturing import Capturing
 
 
-class App(Mediator):
+class App:
 
     def __init__(self, channel=0):
         self.students = Students()
         self.processing = Processing(self.students)
         self.capturing = Capturing(channel)
         self.mainframe = GUI(self.students)
-        self.assign_mediators()
         self.start_session()
 
-    def update(self, event: int, frame=None) -> None:
-        if event == 1:
-            self.mainframe.students_list.update()
-        if event == 2:
-            # NYI Update image
-            return
-
-    def assign_mediators(self):
-        self.processing.mediator = self
-        self.capturing.mediator = self
+    def update(self):
+        self.mainframe.stream(self.capturing.capture_frame)
+        self.mainframe.students_list.update_students()
+        self.mainframe.after(int(1000 / self.capturing.fps), self.update)
 
     def start_session(self) -> None:
         self.capturing.processing = self.processing
         self.processing.start()
         self.capturing.start()
+        self.update()
         self.mainframe.mainloop()
         self.exit()
 
