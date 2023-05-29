@@ -51,11 +51,8 @@ class Processing(Thread, Debugging, Component):
             if self.is_active():
                 if self.is_main_buffer_full():
                     detector = self.get_detection(self.main_buffer[0])
-                    check = detector.check()
-                    print(check)
-                    if check == 0:
+                    if detector.check() == 0:
                         self._run()
-
                     del self.main_buffer
                 else:
                     time.sleep(0.1)
@@ -80,18 +77,18 @@ class Processing(Thread, Debugging, Component):
                 index = i
 
         data = detectors[index].retrieve_data()
+
         if data is None:
-            self.mediator.set_response("Data could not be read")
-            self.log("Data could not be read")
+            self.mediator.set_response("Student Card could not be read")
+            self.log("_run(): Data was None")
         else:
             try:
-                print(data)
                 self._students.students_list = data
-                self.mediator.set_response(f"{data.last_name} has been added")
+                self.mediator.set_response(f"Student '{data['last_name']} {data['first_name']}' has been added")
             except AddingStudentError as error:
-                self.mediator.set_response(f"{error} ")
-            except MaxSeatError as error:
-                self.mediator.set_response(f"{error} ")
+                self.log(f"_run(): {error}")
+            except MaxSeatError:
+                self.mediator.set_response(f"Must set Max seat first")
 
     def add_queue(self, e: numpy) -> None:
         if self.is_active():

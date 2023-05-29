@@ -9,6 +9,7 @@ from PIL import Image, ImageTk
 class GUI(customtkinter.CTk):
     def __init__(self, students):
         super().__init__()
+        self.max_seat = None
         self.students = students
         # configure window
         self.title("Student Card Scanner.py")
@@ -34,7 +35,7 @@ class GUI(customtkinter.CTk):
         self.students_list.grid(row=1, column=0, padx=0, pady=0, sticky="nsew")
         # Maximum Seat Title Widget
         self.max_seat_label = customtkinter.CTkLabel(self.sidebar_frame,
-                                                     text="How many seats?",
+                                                     text="",
                                                      justify="left",
                                                      font=customtkinter.CTkFont(size=15, weight="bold"))
         self.max_seat_label.grid(row=2, column=0, padx=20, pady=(10, 0))
@@ -75,17 +76,32 @@ class GUI(customtkinter.CTk):
 
             self.stream_label.configure(image=de)
 
+    def set_info_text(self, text: str):
+        self.info_label.configure(text=text)
+
+    def set_seat_text(self, number: int):
+        if number == -1:
+            self.max_seat_label.configure(text="How many seats?")
+        else:
+            self.max_seat_label.configure(text=f"{str(number)}/{str(self.max_seat)} seats available")
+
+    def update(self):
+        if self.students.is_seat_list():
+            self.max_seat_button.configure(state="disabled")
+            self.max_seat_input.configure(state="disabled")
+        else:
+            self.max_seat_button.configure(state="normal")
+            self.max_seat_input.configure(state="normal")
+
     def max_set_button_event(self):
         if self.max_seat_input.get() == "":
             return
         if not self.max_seat_input.get().isnumeric():
-            self.info_label.configure(text="Max seat has to be a number")
+            self.set_info_text("Max seat has to be a number")
             return
+
         seat_number = int(self.max_seat_input.get())
-        self.max_seat_label.configure(text=f"{str(seat_number)} Available")
-        self.info_label.configure(text=f"Max seat set to {str(seat_number)}")
-        self.max_seat_button.configure(state="disabled")
-        self.max_seat_input.configure(state="disabled")
+        self.max_seat = seat_number
         self.students.seat_list = seat_number
 
 

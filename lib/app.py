@@ -15,13 +15,18 @@ class App(Mediator):
         self.response = ""
         self.start_session()
 
-    def update_gui(self):
+    def stream(self):
         self.mainframe.stream(self.capturing.capture_frame)
+        self.mainframe.after(int(1000 / self.capturing.fps), self.stream)
+
+    def update_gui(self):
         self.mainframe.students_list.update_students()
+        self.mainframe.update()
+        self.mainframe.set_seat_text(self.students.seat_list)
         if self.response != "":
             self.mainframe.info_label.configure(text=self.response)
             self.response = ""
-        self.mainframe.after(int(1000 / self.capturing.fps), self.update_gui)
+        self.mainframe.after(500, self.update_gui)
 
     def set_response(self, text: str) -> None:
         self.response = text
@@ -35,6 +40,7 @@ class App(Mediator):
         self.processing.start()
         self.capturing.start()
         self.assign()
+        self.stream()
         self.update_gui()
         self.mainframe.mainloop()
         self.exit()
