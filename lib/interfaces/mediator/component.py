@@ -1,4 +1,4 @@
-from lib.mediator.mediator import Mediator
+from lib.interfaces.mediator.mediator import Mediator
 
 
 class Component:

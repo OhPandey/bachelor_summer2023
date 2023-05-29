@@ -4,7 +4,7 @@ from abc import ABC, abstractmethod
 from lib.utils.exceptions import ThreadingError
 
 
-class Threading(ABC):
+class Thread(ABC):
 
     def __init__(self):
         self.thread = None

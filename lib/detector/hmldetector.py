@@ -5,8 +5,8 @@ import cv2
 from PIL import Image
 
 from lib.debugging.debugging import Debugging
-from lib.detectors.detector import Detector
-from lib.data.datasets import OPENCV_SUPPORTED_IMREAD_FORMATS
+from lib.detector.detector import Detector
+from lib.data.dataset import OPENCV_SUPPORTED_IMREAD_FORMATS
 from lib.utils.position import Position
 
 config = configparser.ConfigParser()

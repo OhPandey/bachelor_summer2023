@@ -4,7 +4,7 @@ from unittest import mock
 import numpy
 
 from lib.data.student import Student
-from lib.detectors.detector import Detector
+from lib.detector.detector import Detector
 from lib.threads.processing import Processing
 
 

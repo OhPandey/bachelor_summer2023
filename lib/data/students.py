@@ -6,46 +6,70 @@ from datetime import datetime
 from lib.data.student import Student
 from lib.utils.exceptions import AddingStudentError, MaxSeatError
 from fpdf import FPDF
-from lib.data.datasets import check_student_directory
+from lib.data.dataset import STUDENT_REQUIRED_KEYS
 
 
 class Students:
-    filename = "default-"+str(datetime.now().strftime("%y%m%d%H%M"))
+    filename = "default-" + str(datetime.now().strftime("%y%m%d%H%M"))
 
     def __init__(self):
-        self.students_list = list()
-        self.seat_list = None
+        self._students_list = list()
+        self._seat_list = None
 
-    def add_student(self, data: dict):
+    # student_list functions
+    @property
+    def students_list(self) -> list:
+        return self._students_list
 
-        check = check_student_directory(data)
-        if check is not None:
-            raise AddingStudentError("The dictionary given does not meet the required keys: "+str(check))
+    @students_list.setter
+    def students_list(self, data: dict) -> None:
+        if not all(key in data for key in STUDENT_REQUIRED_KEYS):
+            array = []
+
+            for key in STUDENT_REQUIRED_KEYS:
+                if key not in data:
+                    array.append(key)
+
+            raise AddingStudentError("The dictionary given does not meet the required keys: " + str(array))
 
         if self.is_duplicate(data["student_id"]):
             raise AddingStudentError("The data given is a duplicate")
 
-        if self.get_max_seat() <= 0:
+        if self.seat_list <= 0:
             raise MaxSeatError
 
-        val = self.seat_list[random.randint(0, len(self.seat_list) - 1)]
-        self.seat_list.remove(val)
+        val = self._seat_list[random.randint(0, self.seat_list - 1)]
+        self._seat_list.remove(val)
         data.update({"seat": val})
 
         self.students_list.append(Student(**data))
 
-        return True
+    @students_list.deleter
+    def students_list(self):
+        self._students_list.clear()
 
-    def get_max_seat(self) -> int:
-        if self.seat_list is None:
-            return 0
-        return len(self.seat_list)
+    def remove_student_by_element(self, e: Student) -> bool:
+        try:
+            self._seat_list.append(e.seat)
+            self._students_list.remove(e)
+            return True
+        except ValueError:
+            return False
 
-    def is_seat_list(self) -> bool:
-        return self.seat_list is not None
+    def remove_student_by_index(self, i: int) -> bool:
+        try:
+            self._seat_list.append(self._students_list[i])
+            self._students_list.pop(i)
+            return True
+        except IndexError:
+            return False
 
-    def set_seat_list(self, size: int) -> None:
-        self.seat_list = list(range(size))
+    def remove_student_by_student_id(self, student_id) -> bool:
+        for i, x in enumerate(self._students_list):
+            if x.student_id == student_id:
+                self.remove_student_by_index(i)
+                return True
+        return False
 
     def is_duplicate(self, student_id) -> bool:
         for k in self.students_list:
@@ -54,30 +78,25 @@ class Students:
 
         return False
 
-    def remove_student_by_element(self, e: Student) -> bool:
-        try:
-            self.seat_list.append(e.seat)
-            self.students_list.remove(e)
-            return True
-        except ValueError:
-            return False
+    # seat_list functions
+    @property
+    def seat_list(self) -> int | None:
+        if self._seat_list is None:
+            return -1
+        return len(self._seat_list)
 
-    def remove_student_by_index(self, i: int) -> bool:
-        try:
-            self.seat_list.append(self.students_list[i])
-            self.students_list.pop(i)
-            return True
-        except IndexError:
-            return False
+    @seat_list.setter
+    def seat_list(self, size: int) -> None:
+        self._seat_list = list(range(1, size+1))
 
-    def remove_student_by_student_id(self, student_id) -> bool:
-        for i, x in enumerate(self.students_list):
-            if x.student_id == student_id:
-                self.remove_student_by_index(i)
-                return True
+    @seat_list.deleter
+    def seat_list(self) -> None:
+        self._seat_list = None
 
-        return False
+    def is_seat_list(self) -> bool:
+        return self.seat_list >= 0
 
+    # Saving file functions
     def set_filename(self, filename):
         self.filename = filename
 
@@ -86,7 +105,7 @@ class Students:
         pdf.add_page()
         pdf.set_font("Arial", size=15)
 
-        for i, x in enumerate(self.students_list):
+        for i, x in enumerate(self._students_list):
             if not isinstance(x, Student):
                 text = f"<Error retrieving student#{i}>"
             else:
@@ -105,7 +124,7 @@ class Students:
                 "Seat Number"
             ]
         ]
-        for student in self.students_list:
+        for student in self._students_list:
             data.append([
                 f"{student.last_name} {student.first_name}",
                 f"{student.birth_year}-{student.get_month_number()}-{student.birth_day}",
@@ -121,7 +140,7 @@ class Students:
 
         data = []
 
-        for student in self.students_list:
+        for student in self._students_list:
             data.append({
                 "Name": f"{student.last_name} {student.first_name}",
                 "Birthday": f"{student.birth_year}-{student.get_month_number()}-{student.birth_day}",

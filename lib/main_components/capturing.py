@@ -2,14 +2,14 @@ import time
 import cv2
 
 from lib.debugging.subdirectory import Subdirectory
-from lib.mediator.component import Component
-from lib.threads.processing import Processing
+from lib.interfaces.mediator.component import Component
+from lib.main_components.processing import Processing
 from lib.debugging.debugging import Debugging
 from lib.utils.exceptions import CameraNotAvailable, ProcessingNotAvailableError
-from lib.utils.threads import Threading
+from lib.interfaces.thread.thread import Thread
 
 
-class Capturing(Threading, Debugging, Component):
+class Capturing(Thread, Debugging, Component):
     _capture: "VideoCapture | None" = None
     _capture_frame: "numpy | None" = None
     _processing: "Processing | None" = None
@@ -19,7 +19,7 @@ class Capturing(Threading, Debugging, Component):
     fps: int = None
 
     def __init__(self, channel: int):
-        Threading.__init__(self)
+        Thread.__init__(self)
         Debugging.__init__(self, Subdirectory.CAPTURING)
         self.capture = channel
 

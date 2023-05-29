@@ -23,25 +23,27 @@ class TestStudents(unittest.TestCase):
             "student_id": "0161032355"
         }
 
-        self.students = Students(10)
+        self.students = Students()
+        self.students.seat_list = 2
 
     def test_first(self):
         # Testing adding
-        self.assertTrue(self.students.add_student(self.data))
+        self.students.students_list = self.data
+        self.assertTrue(self.students.students_list[0], self.data)
 
         # Testing duplicate
         self.assertFalse(self.students.is_duplicate(self.data2))
 
     def test_second(self):
         # Testing students list
-        self.students.add_student(self.data)
+        self.students.students_list = self.data
         self.assertEqual(len(self.students.students_list), 1)
-        self.students.add_student(self.data2)
+        self.students.students_list = self.data2
         self.assertEqual(len(self.students.students_list), 2)
 
     def test_third(self):
-        self.students.add_student(self.data)
-        self.students.add_student(self.data2)
+        self.students.students_list = self.data
+        self.students.students_list = self.data2
 
         # Testing removing students
         self.assertTrue(self.students.remove_student_by_student_id(self.data["student_id"]))

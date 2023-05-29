@@ -1,15 +1,8 @@
-import threading
-import time
-import tkinter as tk
-import cv2
-from PIL import Image, ImageTk
-
 from lib.data.students import Students
-from lib.debugging.log import delete_log_all
-from lib.mediator.mediator import Mediator
-from lib.threads.gui import GUI
-from lib.threads.processing import Processing
-from lib.threads.capturing import Capturing
+from lib.interfaces.mediator.mediator import Mediator
+from lib.main_components.gui import GUI
+from lib.main_components.processing import Processing
+from lib.main_components.capturing import Capturing
 
 
 class App(Mediator):
@@ -22,8 +15,12 @@ class App(Mediator):
         self.assign_mediators()
         self.start_session()
 
-    def update(self, event: str) -> None:
-        self.mainframe.students_list.update()
+    def update(self, event: int, frame=None) -> None:
+        if event == 1:
+            self.mainframe.students_list.update()
+        if event == 2:
+            # NYI Update image
+            return
 
     def assign_mediators(self):
         self.processing.mediator = self

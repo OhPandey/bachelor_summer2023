@@ -52,7 +52,7 @@ class GUI(customtkinter.CTk):
             self.info_label.configure(text="Max seat has to be a number")
             return
         self.info_label.configure(text=f"Max seat set to {self.max_seat_button.get()}")
-        self.students.set_seat_list(int(self.max_seat_button.get()))
+        self.students.seat_list = int(self.max_seat_button.get())
 
 
 class ScrollableLabelButtonFrame(customtkinter.CTkScrollableFrame):
@@ -66,7 +66,6 @@ class ScrollableLabelButtonFrame(customtkinter.CTkScrollableFrame):
         self.button_list = []
 
     def update(self):
-        print('Update has been requested.')
         if self.students.is_seat_list():
             diff = len(self.students.students_list) - len(self.label_list)
             if diff > 0:

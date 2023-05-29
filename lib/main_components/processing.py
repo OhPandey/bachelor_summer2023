@@ -4,16 +4,16 @@ import numpy
 from lib.data.students import Students
 from lib.debugging.debugging import Debugging
 from lib.debugging.subdirectory import Subdirectory
-from lib.detectors.detector import Detector
-from lib.detectors.hmldetector import HMLDetector
-from lib.mediator.component import Component
+from lib.detector.detector import Detector
+from lib.detector.hmldetector import HMLDetector
+from lib.interfaces.mediator.component import Component
 from lib.utils.exceptions import AddingStudentError
-from lib.utils.threads import Threading
+from lib.interfaces.thread.thread import Thread
 
 
-class Processing(Threading, Debugging, Component):
+class Processing(Thread, Debugging, Component):
     def __init__(self, students: Students):
-        Threading.__init__(self)
+        Thread.__init__(self)
         Debugging.__init__(self, Subdirectory.PROCESSING)
         self._buffer_size = -1
         self._main_buffer = list()
@@ -48,9 +48,9 @@ class Processing(Threading, Debugging, Component):
 
     def _mainloop(self) -> None:
         while self.is_running():
+            self.mediator.update(1)
             if self.is_active():
                 if self.is_main_buffer_full():
-                    self.mediator.update('1')
                     detector = self.get_detection(self.main_buffer[0])
                     if detector.check() == 2:
                         self._run()
@@ -84,7 +84,7 @@ class Processing(Threading, Debugging, Component):
         else:
             try:
                 print(data)
-                self._students.add_student(data)
+                self._students.students_list = data
             except AddingStudentError as error:
                 print(error)
 
