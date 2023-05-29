@@ -21,53 +21,71 @@ class GUI(customtkinter.CTk):
         self.sidebar_frame = customtkinter.CTkFrame(self, width=140, corner_radius=1)
         self.sidebar_frame.grid(row=0, column=0, rowspan=4, sticky="nsew")
         self.sidebar_frame.grid_rowconfigure(4, weight=1)
-        self.list_label = customtkinter.CTkLabel(self.sidebar_frame, text="List of students",
+        # Student List Title Widget
+        self.list_label = customtkinter.CTkLabel(self.sidebar_frame,
+                                                 text="List of students",
                                                  font=customtkinter.CTkFont(size=15, weight="bold"))
         self.list_label.grid(row=0, column=0, padx=5, pady=(10, 10))
+        # Student List Widget
         self.students_list = ScrollableLabelButtonFrame(master=self.sidebar_frame,
                                                         students=self.students,
                                                         width=250, height=600,
                                                         corner_radius=0)
         self.students_list.grid(row=1, column=0, padx=0, pady=0, sticky="nsew")
-        self.max_seat_label = customtkinter.CTkLabel(self.sidebar_frame, text="How many seats?", justify="left",
+        # Maximum Seat Title Widget
+        self.max_seat_label = customtkinter.CTkLabel(self.sidebar_frame,
+                                                     text="How many seats?",
+                                                     justify="left",
                                                      font=customtkinter.CTkFont(size=15, weight="bold"))
         self.max_seat_label.grid(row=2, column=0, padx=20, pady=(10, 0))
-
-        self.max_seat_button = customtkinter.CTkEntry(self.sidebar_frame, placeholder_text="Number", width=180)
-        self.max_seat_button.grid(row=3, column=0, padx=10, pady=20, sticky="w")
-        self.main_button = customtkinter.CTkButton(self.sidebar_frame, text="Set", width=50,
-                                                   command=self.max_set_button_event)
-        self.main_button.grid(row=3, column=0, padx=10, pady=20, sticky="e")
+        # Maximum Seat Input Widget
+        self.max_seat_input = customtkinter.CTkEntry(self.sidebar_frame,
+                                                     placeholder_text="Type your number here",
+                                                     width=200)
+        self.max_seat_input.grid(row=3, column=0, padx=10, pady=20, sticky="w")
+        # Maximum Seat Button Widget
+        self.max_seat_button = customtkinter.CTkButton(self.sidebar_frame,
+                                                       text="Set",
+                                                       width=50,
+                                                       command=self.max_set_button_event)
+        self.max_seat_button.grid(row=3, column=0, padx=10, pady=20, sticky="e")
 
         # Main frame
         self.capture_frame = customtkinter.CTkFrame(self)
         self.capture_frame.grid(row=0, column=1, padx=(20, 20), pady=(20, 20), sticky="nsew")
-        self.info_label = customtkinter.CTkLabel(self.capture_frame, text="Test",
+        # Interactive Response Label Widget
+        self.info_label = customtkinter.CTkLabel(self.capture_frame,
+                                                 text="<Students Card Detector>",
                                                  font=customtkinter.CTkFont(size=20, weight="bold"),
                                                  width=1200)
         self.info_label.grid(row=0, column=0, padx=5, pady=(10, 10), sticky="")
-        # image_path = os.path.join(os.path.dirname(os.path.realpath(__file__)))
-        self.large_test_image = customtkinter.CTkImage(Image.open('video-not-working.png'), size=(1000, 500))
-        self.home_frame_large_image_label = customtkinter.CTkLabel(self.capture_frame, text="",
-                                                                   image=self.large_test_image)
-        self.home_frame_large_image_label.grid(row=1, column=0, padx=20, pady=10)
+        # Camera Widget
+        default_image = customtkinter.CTkImage(Image.open('video-not-working.png'), size=(1000, 500))
+        self.stream_label = customtkinter.CTkLabel(self.capture_frame,
+                                                   text="",
+                                                   image=default_image)
+        self.stream_label.grid(row=1, column=0, padx=20, pady=10)
 
     def stream(self, capture):
         if capture is not None:
             img = Image.fromarray(cv2.cvtColor(capture, cv2.COLOR_BGR2RGB))
 
-            de = customtkinter.CTkImage(img, size=(self.capture_frame.winfo_width()-100, self.capture_frame.winfo_height()-100))
+            de = customtkinter.CTkImage(img, size=(
+                self.capture_frame.winfo_width() - 100, self.capture_frame.winfo_height() - 100))
 
-            self.home_frame_large_image_label.configure(image=de)
+            self.stream_label.configure(image=de)
 
     def max_set_button_event(self):
-        if self.max_seat_button.get() == "":
+        if self.max_seat_input.get() == "":
             return
-        if not self.max_seat_button.get().isnumeric():
+        if not self.max_seat_input.get().isnumeric():
             self.info_label.configure(text="Max seat has to be a number")
             return
-        self.info_label.configure(text=f"Max seat set to {self.max_seat_button.get()}")
-        self.students.seat_list = int(self.max_seat_button.get())
+        self.max_seat_label.configure(text=f"{self.max_seat_input.get()} Available")
+        self.info_label.configure(text=f"Max seat set to {self.max_seat_input.get()}")
+        self.max_seat_button.configure(state="disabled")
+        self.max_seat_input.configure(state="disabled")
+        self.students.seat_list = int(self.max_seat_input.get())
 
 
 class ScrollableLabelButtonFrame(customtkinter.CTkScrollableFrame):
