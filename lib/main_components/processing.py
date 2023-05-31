@@ -64,7 +64,11 @@ class Processing(Thread, Debugging, Component):
                 else:
                     time.sleep(0.1)
                 if self.is_main_buffer_full():
-                    detector = self.get_detection(self.main_buffer[0])
+                    if self.get_detection(self.main_buffer[0]).is_card():
+                        if self.target is True:
+                            self.mediator.set_response("Is a student card.")
+                        else:
+                            self._run()
                     del self.main_buffer
             else:
                 time.sleep(0.1)
@@ -73,32 +77,32 @@ class Processing(Thread, Debugging, Component):
         if self.detection_option == 1:
             return HMLDetector(frame)
 
-    # def _run(self) -> None:
-    #     detectors = list()
-    #     for i in range(10):
-    #         detectors.append(self.get_detection(self.main_buffer[i]))
-    #
-    #     highest_quality = 0
-    #     index = 0
-    #     for i, v in enumerate(detectors):
-    #         quality = v.get_quality()
-    #         if quality > highest_quality:
-    #             highest_quality = quality
-    #             index = i
-    #
-    #     data = detectors[index].retrieve_data()
-    #
-    #     if data is None:
-    #         self.mediator.set_response("Student Card could not be read")
-    #         self.log("_run(): Data was None")
-    #     else:
-    #         try:
-    #             self._students.students_list = data
-    #             self.mediator.set_response(f"Student '{data['last_name']} {data['first_name']}' has been added")
-    #         except AddingStudentError as error:
-    #             self.log(f"_run(): {error}")
-    #         except MaxSeatError:
-    #             self.mediator.set_response(f"Must set Max seat first")
+    def _run(self) -> None:
+        detectors = list()
+        for i in range(10):
+            detectors.append(self.get_detection(self.main_buffer[i]))
+
+        highest_quality = 0
+        index = 0
+        for i, v in enumerate(detectors):
+            quality = v.quality
+            if quality > highest_quality:
+                highest_quality = quality
+                index = i
+
+        data = detectors[index].retrieve_data()
+
+        if data is None:
+            self.mediator.set_response("Student Card could not be read")
+            self.log("_run(): Data was None")
+        else:
+            try:
+                self._students.students_list = data
+                self.mediator.set_response(f"Student '{data['last_name']} {data['first_name']}' has been added")
+            except AddingStudentError as error:
+                self.log(f"_run(): {error}")
+            except MaxSeatError:
+                self.mediator.set_response(f"Must set Max seat first")
 
     def add_queue(self, e: numpy) -> None:
         if self.is_active():

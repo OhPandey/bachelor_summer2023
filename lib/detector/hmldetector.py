@@ -15,11 +15,6 @@ from lib.utils.position import Position
 # It checks the card in a normal non-machine learning approach
 # but takes advantage of the face recognition (that is easily available) to find the card position
 class HMLDetector(Detector, Debugging):
-    def check(self):
-        pass
-
-    def retrieve_data(self):
-        pass
 
     template = "truetemplate.jpg"
 
@@ -119,7 +114,6 @@ class HMLDetector(Detector, Debugging):
                 except ValueError:
                     pass
 
-            print(len(goodMatches))
             return len(goodMatches)
 
         return 0

@@ -22,10 +22,6 @@ class Detector(ABC):
         self._face = None
         self._card = None
 
-    @abstractmethod
-    def check(self):
-        pass
-
     # Image Functions
     @property
     def frame(self) -> numpy:
@@ -156,19 +152,20 @@ class Detector(ABC):
         pass
 
     # Text-detection Functions
-    @abstractmethod
     def retrieve_data(self):
+        if self.card is None:
+            return None
         data = self._text_detection()
         return data
 
-    def _scanning_area(self) -> Position:
+    def _scanning_area(self) -> Position | None:
         """
         Gives the position of the area that is going to be scanned
 
         In order to reduce processing power, this method returns the Position where the OCR should happen.
 
-        :return: The position of the scanning area on the card
-        :rtype: Position
+        :return: The position of the scanning area on the card. Returns none if card doesn't exist.
+        :rtype: Position | None
         """
 
         y1 = self.card.y1 + self.card.get_height(1 / 1.7)
@@ -179,9 +176,6 @@ class Detector(ABC):
     def _text_detection(self):
         area = self._scanning_area()
 
-        if area is None:
-            return None
-
         reader = easyocr.Reader(['en'], gpu=True)
         frame = self.gray_frame[area.y1:area.y2, area.x1:area.x2]
         blur = cv2.GaussianBlur(frame, (5, 5), 1)
@@ -190,7 +184,8 @@ class Detector(ABC):
 
         return self._process_data(all_results)
 
-    def _process_data(self, all_results):
+    @staticmethod
+    def _process_data(all_results):
         # Evaluating the data
         if all_results is None:
             return None
