@@ -39,10 +39,10 @@ class HMLDetector(Detector, Debugging):
             if self.is_card():
                 face = self.face
                 if face is not None:
-                    x1 = face.x1 - round(face.get_width(3))
-                    y1 = face.y1 - round(face.get_height(0.9))
-                    x2 = face.x2 + round(face.get_width(1 / 2.5))
-                    y2 = face.y2 + round(face.get_height(0.8))
+                    x1 = face.x1 - round(face.get_width(4.25))
+                    y1 = face.y1 - round(face.get_height(1.5))
+                    x2 = face.x2 + round(face.get_width(0.5))
+                    y2 = face.y2 + round(face.get_height(1.25))
                     self._card = Position(x1, y1, x2, y2)
                     return self._card
 
@@ -123,40 +123,3 @@ class HMLDetector(Detector, Debugging):
             return len(goodMatches)
 
         return 0
-
-    def draw_rectangle(self) -> numpy:
-        """
-        Draws and returns a rectangle on the current image if a card is found.
-
-        This method draws a rectangle on the current frame, indicating the location and size of the detected card.
-        It also adds text displaying the width and height of the card within the rectangle.
-
-        :returns: An array representation of the modified image.
-        :rtype: numpy.ndarray
-
-        """
-        if self.card is not None:
-            rectangle = cv2.rectangle(self.frame,
-                                      (self.card.x1, self.card.y1),
-                                      (self.card.x2, self.card.y2),
-                                      (0, 0, 255),
-                                      2)
-            textx = cv2.putText(rectangle,
-                                f"{self.card.get_width()} px",
-                                (int(self.card.x1 + self.card.get_width() / 2 - 50), self.card.y1 - 20),
-                                cv2.FONT_HERSHEY_SIMPLEX,
-                                1,
-                                (0, 0, 255),
-                                2)
-            texty = cv2.putText(textx,
-                                f"{self.card.get_height()} px",
-                                (int(self.card.x1 + 20), int(self.card.y1 + self.card.get_height() / 2)),
-                                cv2.FONT_HERSHEY_SIMPLEX,
-                                1,
-                                (0, 0, 255),
-                                2)
-            if self.is_debugging():
-                cv2.imwrite('rectangle_frame_.jpg', texty)
-            return texty
-        else:
-            return self.frame

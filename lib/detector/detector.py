@@ -63,9 +63,6 @@ class Detector(ABC):
 
             self._face = Position(x1, y1, x2, y2)
 
-            if self._face.adjusted is False:
-                self._face.add_offset(self.face_offset)
-
         return self._face
 
     # Card Function
@@ -83,18 +80,18 @@ class Detector(ABC):
         if self.card() is None:
             return False
 
-        if not isinstance(self.card() , Position):
+        if not isinstance(self.card(), Position):
             return False
 
-        if self.card() .x1 < 0 or self.card() .y2 < 0:
+        if self.card().x1 < 0 or self.card().y2 < 0:
             return False
 
         h, w, z = self.frame.shape
 
-        if self.card() .x2 > w or self.card() .y2 > h:
+        if self.card().x2 > w or self.card().y2 > h:
             return False
 
-        if self.card() .get_width() < w * self.card_width or self._card.get_height() < h * self.card_height:
+        if self.card().get_width() < w * self.card_width or self._card.get_height() < h * self.card_height:
             return False
 
         return True
@@ -117,13 +114,13 @@ class Detector(ABC):
         return data
 
     def minimised_area(self) -> Position | None:
-        if self.card() is None:
+        if self.card is None:
             return None
 
-        y1 = self.card().y1 + self.card() .get_height(1 / 1.7)
-        x2 = self.card() .x2 - self.card() .get_width(1 / 2.5)
+        y1 = self.card.y1 + self.card.get_height(1 / 1.7)
+        x2 = self.card.x2 - self.card.get_width(1 / 2.5)
 
-        return Position(self.card() .x1, y1, x2, self.card() .y2)
+        return Position(self.card.x1, y1, x2, self.card.y2)
 
     def _text_detection(self):
         area = self.minimised_area()
@@ -240,6 +237,69 @@ class Detector(ABC):
         }
 
     # Debugging
-    @abstractmethod
     def draw_rectangle(self) -> numpy:
-        pass
+        """
+        Draws and returns a rectangle on the current image if a card is found.
+
+        This method draws a rectangle on the current frame, indicating the location and size of the detected card.
+        It also adds text displaying the width and height of the card within the rectangle.
+
+        :returns: An array representation of the modified image.
+        :rtype: numpy.ndarray
+
+        """
+        if self.card is not None:
+            # Face
+            face = cv2.rectangle(self.frame,
+                                 (self.face.x1, self.face.y1),
+                                 (self.face.x2, self.face.y2),
+                                 (255, 0, 0),
+                                 2)
+
+            # Student card
+            card = cv2.rectangle(face,
+                                 (self.card.x1, self.card.y1),
+                                 (self.card.x2, self.card.y2),
+                                 (0, 0, 255),
+                                 2)
+            card_textx = cv2.putText(card,
+                                     f"{self.card.get_width()} px",
+                                     (int(self.card.x1 + self.card.get_width() / 2 - 50), self.card.y1 - 20),
+                                     cv2.FONT_HERSHEY_SIMPLEX,
+                                     1,
+                                     (0, 0, 255),
+                                     2)
+            card_texty = cv2.putText(card_textx,
+                                     f"{self.card.get_height()} px",
+                                     (int(self.card.x1 + 10), int(self.card.y1 + self.card.get_height() / 2)),
+                                     cv2.FONT_HERSHEY_SIMPLEX,
+                                     1,
+                                     (0, 0, 255),
+                                     2)
+
+            # Scanning area
+            scan_position = self.minimised_area()
+            scan = cv2.rectangle(card_texty,
+                                 (scan_position.x1, scan_position.y1),
+                                 (scan_position.x2, scan_position.y2),
+                                 (0, 255, 0),
+                                 2)
+
+            scan_textx = cv2.putText(scan,
+                                     f"{scan_position.get_width()} px",
+                                     (int(scan_position.x1 + scan_position.get_width() / 2 - 50), scan_position.y1 + 30),
+                                     cv2.FONT_HERSHEY_SIMPLEX,
+                                     1,
+                                     (0, 255, 0),
+                                     2)
+            scan_texty = cv2.putText(scan_textx,
+                                     f"{scan_position.get_height()} px",
+                                     (int(scan_position.x1 + 10), int(scan_position.y1 + scan_position.get_height() / 2)),
+                                     cv2.FONT_HERSHEY_SIMPLEX,
+                                     1,
+                                     (0, 255, 0),
+                                     2)
+
+            return scan_texty
+        else:
+            return self.frame
