@@ -26,13 +26,13 @@ class HMLDetector(Detector, Debugging):
     @property
     def card(self) -> Position:
         """
-        Retrieves the location of the student card.
+        Getter method for the card position
 
         This method returns the location of the student card, represented as a `Position` object.
         If the card location has not been determined yet, the method performs the necessary checks
         and calculations to determine the card's position based on the detected face.
 
-        :return: The location of the student card as a `Position` object.
+        :return: The location of the student card
         :rtype: Position
         """
         if self._card is None:
@@ -49,14 +49,14 @@ class HMLDetector(Detector, Debugging):
         return self._card
 
     def is_card(self) -> bool:
-        return bool(self._check_template() and self._is_enough_features())
+        return bool(self._is_template() and self._is_enough_features())
 
-    def _check_template(self):
+    def _is_template(self):
         """
         Checks if the template is acceptable or not.
 
         This method verifies the template by performing several checks:
-        - It ensures that the template file extension is supported by OpenCV.
+        - It ensures that the template file extension is supported by OpenCV's formats.
         - It checks if the template file exists.
         - It attempts to open the template image using the Pillow library and verifies its integrity.
 

@@ -29,17 +29,37 @@ class Detector(ABC):
     # Image Functions
     @property
     def frame(self) -> numpy:
+        """
+        Getter method for the (current) frame.
+
+        :return: Frame
+        :rtype: numpy.ndarray
+        """
         return self._frame
 
     @property
     def gray_frame(self) -> numpy:
+        """
+        Getter method for the gray frame.
+
+        In order to avoid multiple calculations, this method returns the gray frame.
+
+        :return: Gray frame
+        :rtype: numpy.ndarray
+        """
         if self._gray_frame is None:
             self._gray_frame = cv2.cvtColor(self.frame, cv2.COLOR_BGR2GRAY)
 
         return self._gray_frame
 
     @property
-    def quality(self):
+    def quality(self) -> float:
+        """
+        Getter method for the quality of an image
+
+        :return: The quality of an image
+        :rtype: float
+        """
         if self._quality is None:
             self._quality = cv2.PSNR(self.gray_frame, cv2.equalizeHist(self.gray_frame))
 
@@ -48,20 +68,26 @@ class Detector(ABC):
     # Face Functions
     @property
     def face(self) -> Position | None:
+        """
+        Getter method for the face.
+
+        If there is only one face detected, the position of the detected face is returned as a `Position` object.
+
+        :return: The position of the (detected) face (or None)
+        :rtype: Position | None
+        """
         if self._face is None:
             faces = cv2.CascadeClassifier('haarcascade_frontalface_default.xml').detectMultiScale(self.frame, 1.1, 4)
 
-            if len(faces) != 1:
-                return None
+            if len(faces) == 1:
+                face = faces[0]
 
-            face = faces[0]
+                x1 = face[0]
+                y1 = face[1]
+                x2 = face[0] + face[2]
+                y2 = face[1] + face[3]
 
-            x1 = face[0]
-            y1 = face[1]
-            x2 = face[0] + face[2]
-            y2 = face[1] + face[3]
-
-            self._face = Position(x1, y1, x2, y2)
+                self._face = Position(x1, y1, x2, y2)
 
         return self._face
 
@@ -76,25 +102,47 @@ class Detector(ABC):
         """
         pass
 
-    def card_check(self) -> bool:
-        if self.card() is None:
-            return False
+    def _is_card_outside_of_frame(self):
+        """
+        Checks if the card is outside the frame boundaries.
 
-        if not isinstance(self.card(), Position):
-            return False
-
-        if self.card().x1 < 0 or self.card().y2 < 0:
-            return False
-
+        :return: True if the card is outside the frame, False otherwise.
+        :rtype: bool
+        """
         h, w, z = self.frame.shape
+        return bool(self.card().x1 < 0 or self.card().y2 < 0 or self.card().x2 > w or self.card().y2 > h)
 
-        if self.card().x2 > w or self.card().y2 > h:
-            return False
+    def _is_card_too_far(self):
+        """
+        Checks if the card is positioned too far from the expected configured size.
 
-        if self.card().get_width() < w * self.card_width or self._card.get_height() < h * self.card_height:
-            return False
+        :return: True if the card is too far from the expected configured size, False otherwise.
+        :rtype: bool
+        """
+        h, w, z = self.frame.shape
+        return bool(self.card().get_width() < w * self.card_width or self._card.get_height() < h * self.card_height)
 
-        return True
+    def card_check(self) -> int:
+        """
+        Performs a series of checks on the student card to determine its validity.
+
+        :return: An integer indicating the result of the card check.
+            - 0: The card passes all checks and is valid (for further process)
+            - 1: The card is positioned too far from the expected configured size.
+            - 2: The card is outside the frame boundaries.
+            - 3: No card detected. (Should never occur)
+        :rtype: int
+        """
+        if self.card() is None:
+            return 3
+
+        if self._is_card_outside_of_frame():
+            return 2
+
+        if self._is_card_too_far():
+            return 1
+
+        return 0
 
     @abstractmethod
     def is_card(self):
@@ -113,9 +161,15 @@ class Detector(ABC):
         data = self._text_detection()
         return data
 
-    def minimised_area(self) -> Position | None:
-        if self.card is None:
-            return None
+    def _scanning_area(self) -> Position:
+        """
+        Gives the position of the area that is going to be scanned
+
+        In order to reduce processing power, this method returns the Position where the OCR should happen.
+
+        :return: The position of the scanning area on the card
+        :rtype: Position
+        """
 
         y1 = self.card.y1 + self.card.get_height(1 / 1.7)
         x2 = self.card.x2 - self.card.get_width(1 / 2.5)
@@ -123,7 +177,7 @@ class Detector(ABC):
         return Position(self.card.x1, y1, x2, self.card.y2)
 
     def _text_detection(self):
-        area = self.minimised_area()
+        area = self._scanning_area()
 
         if area is None:
             return None
@@ -278,7 +332,7 @@ class Detector(ABC):
                                      2)
 
             # Scanning area
-            scan_position = self.minimised_area()
+            scan_position = self._scanning_area()
             scan = cv2.rectangle(card_texty,
                                  (scan_position.x1, scan_position.y1),
                                  (scan_position.x2, scan_position.y2),
@@ -287,14 +341,16 @@ class Detector(ABC):
 
             scan_textx = cv2.putText(scan,
                                      f"{scan_position.get_width()} px",
-                                     (int(scan_position.x1 + scan_position.get_width() / 2 - 50), scan_position.y1 + 30),
+                                     (
+                                     int(scan_position.x1 + scan_position.get_width() / 2 - 50), scan_position.y1 + 30),
                                      cv2.FONT_HERSHEY_SIMPLEX,
                                      1,
                                      (0, 255, 0),
                                      2)
             scan_texty = cv2.putText(scan_textx,
                                      f"{scan_position.get_height()} px",
-                                     (int(scan_position.x1 + 10), int(scan_position.y1 + scan_position.get_height() / 2)),
+                                     (int(scan_position.x1 + 10),
+                                      int(scan_position.y1 + scan_position.get_height() / 2)),
                                      cv2.FONT_HERSHEY_SIMPLEX,
                                      1,
                                      (0, 255, 0),
