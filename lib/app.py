@@ -1,4 +1,5 @@
 from lib.data.students import Students
+from lib.debugging import config
 from lib.interfaces.mediator.mediator import Mediator
 from lib.main_components.gui import GUI
 from lib.main_components.processing import Processing
@@ -13,10 +14,20 @@ class App(Mediator):
         self.capturing = Capturing(channel)
         self.mainframe = GUI(self.students)
         self.response = ""
+        self._target = config.get_config('project', 'show_target')
         self.start_session()
 
+    @property
+    def target(self) -> bool:
+        if self._target == "True":
+            return True
+        return False
+
     def stream(self):
-        self.mainframe.stream(self.capturing.capture_frame)
+        if self.target:
+            self.mainframe.stream(self.processing.capture_frame)
+        else:
+            self.mainframe.stream(self.capturing.capture_frame)
         self.mainframe.after(int(1000 / self.capturing.fps), self.stream)
 
     def update_gui(self):

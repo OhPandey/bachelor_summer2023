@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 import re
 import cv2
+import numpy
 from easyocr import easyocr
 
 from lib.debugging.config import get_config
@@ -15,35 +16,39 @@ class Detector(ABC):
     card_height = 0.5
 
     def __init__(self, frame):
-        self.frame = frame
-        self.quality = None
-        self.gray_frame = None
-        self.face = None
-        self.card = None
+        self._frame = frame
+        self._gray_frame = None
+        self._quality = None
+        self._face = None
+        self._card = None
 
     @abstractmethod
     def check(self):
         pass
 
     # Image Functions
-    def get_colored_frame(self):
-        return self.frame
+    @property
+    def frame(self) -> numpy:
+        return self._frame
 
-    def get_grayed_frame(self):
-        if self.gray_frame is None:
-            self.gray_frame = cv2.cvtColor(self.frame, cv2.COLOR_BGR2GRAY)
+    @property
+    def gray_frame(self) -> numpy:
+        if self._gray_frame is None:
+            self._gray_frame = cv2.cvtColor(self.frame, cv2.COLOR_BGR2GRAY)
 
-        return self.gray_frame
+        return self._gray_frame
 
-    def get_quality(self):
-        if self.quality is None:
-            self.quality = cv2.PSNR(self.get_grayed_frame(), cv2.equalizeHist(self.get_grayed_frame()))
+    @property
+    def quality(self):
+        if self._quality is None:
+            self._quality = cv2.PSNR(self.gray_frame, cv2.equalizeHist(self.gray_frame))
 
-        return self.quality
+        return self._quality
 
     # Face Functions
-    def get_face(self) -> Position | None:
-        if self.face is None:
+    @property
+    def face(self) -> Position | None:
+        if self._face is None:
             faces = cv2.CascadeClassifier('haarcascade_frontalface_default.xml').detectMultiScale(self.frame, 1.1, 4)
 
             if len(faces) != 1:
@@ -56,33 +61,54 @@ class Detector(ABC):
             x2 = face[0] + face[2]
             y2 = face[1] + face[3]
 
-            self.face = Position(x1, y1, x2, y2)
+            self._face = Position(x1, y1, x2, y2)
 
-            if self.face.adjusted is False:
-                self.face.add_offset(self.face_offset)
+            if self._face.adjusted is False:
+                self._face.add_offset(self.face_offset)
 
-        return self.face
+        return self._face
 
-    # Card Functions
+    # Card Function
+    @abstractmethod
+    def card(self) -> Position:
+        """
+        Returns the location of the student card.
+
+        :return: The location of the student card
+        :rtype: Position
+        """
+        pass
+
     def card_check(self) -> bool:
-        if self.card is None:
+        if self.card() is None:
             return False
 
-        if not isinstance(self.card, Position):
+        if not isinstance(self.card() , Position):
             return False
 
-        if self.card.x1 < 0 or self.card.y2 < 0:
+        if self.card() .x1 < 0 or self.card() .y2 < 0:
             return False
 
         h, w, z = self.frame.shape
 
-        if self.card.x2 > w or self.card.y2 > h:
+        if self.card() .x2 > w or self.card() .y2 > h:
             return False
 
-        if self.card.get_width() < w * self.card_width or self.card.get_height() < h * self.card_height:
+        if self.card() .get_width() < w * self.card_width or self._card.get_height() < h * self.card_height:
             return False
 
         return True
+
+    @abstractmethod
+    def is_card(self):
+        """
+        Determines whether the current frame has a student card or not.
+
+        :return: A boolean value indicating whether the frame has a student card or not
+                 Returns True if it meets the criteria of a card, and False otherwise.
+        :rtype: bool
+        """
+        pass
 
     # Text-detection Functions
     @abstractmethod
@@ -91,13 +117,13 @@ class Detector(ABC):
         return data
 
     def minimised_area(self) -> Position | None:
-        if self.card is None:
+        if self.card() is None:
             return None
 
-        y1 = self.card.y1 + self.card.get_height(1 / 1.7)
-        x2 = self.card.x2 - self.card.get_width(1 / 2.5)
+        y1 = self.card().y1 + self.card() .get_height(1 / 1.7)
+        x2 = self.card() .x2 - self.card() .get_width(1 / 2.5)
 
-        return Position(self.card.x1, y1, x2, self.card.y2)
+        return Position(self.card() .x1, y1, x2, self.card() .y2)
 
     def _text_detection(self):
         area = self.minimised_area()
@@ -106,7 +132,7 @@ class Detector(ABC):
             return None
 
         reader = easyocr.Reader(['en'], gpu=True)
-        frame = self.get_grayed_frame()[area.y1:area.y2, area.x1:area.x2]
+        frame = self.gray_frame[area.y1:area.y2, area.x1:area.x2]
         blur = cv2.GaussianBlur(frame, (5, 5), 1)
         cv2.imwrite('debugging/realtest.jpg', blur)
         all_results = reader.readtext(blur)
@@ -212,3 +238,8 @@ class Detector(ABC):
             'birth_year': birth_year,
             'student_id': student_id
         }
+
+    # Debugging
+    @abstractmethod
+    def draw_rectangle(self) -> numpy:
+        pass
