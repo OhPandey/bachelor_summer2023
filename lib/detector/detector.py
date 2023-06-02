@@ -216,7 +216,7 @@ class Detector(ABC):
 
             if len(results) < 3:
                 return None
-            print(results)
+
             return processing_data_tesseract(results)
 
         return None

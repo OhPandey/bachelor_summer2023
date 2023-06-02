@@ -40,7 +40,6 @@ def is_student_dic_empty(value: dict):
 def is_student_id(value):
     match = re.search(r"\d{10}", value)
     if match:
-        print(match.group())
         return match.group()
 
     return int()
