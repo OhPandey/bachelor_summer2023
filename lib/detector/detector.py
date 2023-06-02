@@ -1,11 +1,12 @@
 from abc import ABC, abstractmethod
-import re
 import cv2
 import numpy
 from easyocr import easyocr
+import pytesseract
 
 from lib.debugging.config import get_config
 from lib.utils.position import Position
+from lib.utils.processing_data import processing_data_easyocr, processing_data_tesseract
 
 
 class Detector(ABC):
@@ -21,6 +22,7 @@ class Detector(ABC):
         self._quality = None
         self._face = None
         self._card = None
+        self.ocr = 2
 
     # Image Functions
     @property
@@ -155,8 +157,7 @@ class Detector(ABC):
     def retrieve_data(self):
         if self.card is None:
             return None
-        data = self._text_detection()
-        return data
+        return self._text_detection()
 
     def _scanning_area(self) -> Position | None:
         """
@@ -175,115 +176,50 @@ class Detector(ABC):
 
     def _text_detection(self):
         area = self._scanning_area()
-
-        reader = easyocr.Reader(['en'], gpu=True)
         frame = self.gray_frame[area.y1:area.y2, area.x1:area.x2]
         blur = cv2.GaussianBlur(frame, (5, 5), 1)
-        cv2.imwrite('debugging/realtest.jpg', blur)
-        all_results = reader.readtext(blur)
 
-        return self._process_data(all_results)
+        # Debugging:
+        # cv2.imwrite('debugging/realtest.jpg', blur)
 
-    @staticmethod
-    def _process_data(all_results):
-        # Evaluating the data
-        if all_results is None:
-            return None
+        if self.ocr == 1:
+            reader = easyocr.Reader(['en'], gpu=True)
+            all_results = reader.readtext(blur)
+            if all_results is None:
+                return None
 
-        potential_results = list()
-        for (place, text, prob) in all_results:
-            print(f'Detected text: {text}, {prob:.2f}')
-            if prob >= 0.5:
-                potential_results.append(text)
+            results = list()
 
-        if len(potential_results) < 3:
-            return None
+            for place, text, prob in all_results:
+                if prob >= 0.5:
+                    # Debugging
+                    print(f'Detected text: {text}, {prob:.2f}')
+                    results.append(text)
 
-        last_name = ""
-        first_name = ""
-        birth_day = None
-        birth_year = None
-        birth_month = None
-        student_id = None
+            if len(results) < 3:
+                return None
 
-        for e in potential_results:
-            match = re.search(r"\d{9}", e)
-            if match:
-                student_id = match.group()
-                potential_results.remove(e)
+            return processing_data_easyocr(results)
 
-        def is_year(value):
-            return value.isnumeric() and len(value) == 4
+        if self.ocr == 2:
+            pytesseract.pytesseract.tesseract_cmd = 'tesseract/tesseract.exe'
+            result = pytesseract.image_to_data(blur, output_type=pytesseract.Output.DICT)
 
-        def is_month(value):
-            months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October',
-                      'November', 'December']
-            pattern = r'^(?:' + '|'.join(months) + r')$'
-            return bool(re.match(pattern, value, re.IGNORECASE))
+            results = list()
 
-        def is_day(value):
-            return value.isnumeric() and len(value) == 2
+            for i, text in enumerate(result['text']):
+                prob = int(result['conf'][i])
+                if prob >= 90:
+                    # Debugging
+                    print(f"Word: {text}, Confidence: {prob}")
+                    results.append(text)
 
-        values = list()
+            if len(results) < 3:
+                return None
+            print(results)
+            return processing_data_tesseract(results)
 
-        for e in potential_results:
-            v = e.split()
-            if len(v) >= 2:
-                if v[0].isnumeric() or v[1].isnumeric():
-                    found = list()
-                    for p in v:
-                        if is_year(p):
-                            birth_year = p
-                            found.append(birth_year)
-                        if is_day(p):
-                            birth_day = p
-                            found.append(birth_day)
-                    for q in found:
-                        v.remove(q)
-
-                    if is_month(v[0]):
-                        birth_month = v[0]
-
-                    values.append(e)
-
-            if is_year(e) and birth_year is None:
-                birth_year = e
-                values.append(e)
-
-            if is_day(e) and birth_day is None:
-                birth_day = e
-                values.append(e)
-
-            if is_month(e) and birth_month is None:
-                birth_month = e
-                values.append(e)
-
-        if len(values) >= 1:
-            for e in values:
-                potential_results.remove(e)
-
-        for e in potential_results:
-            v = e.split()
-            for p in v:
-                if p.isupper():
-                    last_name += " " + p
-                else:
-                    first_name += " " + p
-
-        if last_name != "":
-            last_name = last_name[1:]
-
-        if first_name != "":
-            first_name = first_name[1:]
-
-        return {
-            'last_name': last_name,
-            'first_name': first_name,
-            'birth_day': birth_day,
-            'birth_month': birth_month,
-            'birth_year': birth_year,
-            'student_id': student_id
-        }
+        return None
 
     # Debugging
     def draw_rectangle(self) -> numpy:
