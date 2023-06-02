@@ -1,6 +1,10 @@
 import re
 from datetime import datetime
 
+blacklist = [
+    "Nom", "Name", "Prenom", "Born", "Matricule", "le", "Bom", "|", "Neve", "", "/"
+]
+
 student_dic: dict = {
     'last_name': str(),
     'first_name': str(),
@@ -34,8 +38,9 @@ def is_student_dic_empty(value: dict):
 
 
 def is_student_id(value):
-    match = re.search(r"\d{9}", value)
+    match = re.search(r"\d{10}", value)
     if match:
+        print(match.group())
         return match.group()
 
     return int()
@@ -87,6 +92,9 @@ def processing_data(data_list: list):
     data = student_dic.copy()
 
     for element in data_list:
+        if element in blacklist:
+            continue
+
         result = is_student_id(element)
         if result is not int():
             data["student_id"] = result
