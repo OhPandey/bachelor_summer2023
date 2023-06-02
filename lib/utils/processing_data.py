@@ -86,42 +86,31 @@ def processing_data(data_list: list):
     # Copy dictionary (call by reference)
     data = student_dic.copy()
 
-    # A list to track the found elements to improve performance
-    found_elements = list()
-
     for element in data_list:
-        if element not in found_elements:
-            result = is_student_id(element)
-            if result is not int():
-                data["student_id"] = result
-                found_elements.append(element)
+        result = is_student_id(element)
+        if result is not int():
+            data["student_id"] = result
+            continue
 
-        if element not in found_elements:
-            result = is_year(element)
-            if result is not int():
-                data["birth_year"] = result
-                found_elements.append(element)
+        result = is_year(element)
+        if result is not int():
+            data["birth_year"] = result
+            continue
 
-        if element not in found_elements:
-            result = is_month(element)
-            if result is not str():
-                data["birth_month"] = result
-                found_elements.append(element)
+        result = is_month(element)
+        if result is not str():
+            data["birth_month"] = result
+            continue
 
-        if element not in found_elements:
-            result = is_day(element)
-            if result is not int():
-                data["birth_day"] = result
-                found_elements.append(element)
+        result = is_day(element)
+        if result is not int():
+            data["birth_day"] = result
+            continue
 
-        if element not in found_elements:
-            if element.isupper():
-
-                data["last_name"] += " " + element
-            else:
-                data["first_name"] += " " + element
-
-            found_elements.append(element)
+        if element.isupper():
+            data["last_name"] += " " + element
+        else:
+            data["first_name"] += " " + element
 
     if data["last_name"] is not str():
         if data["last_name"][0] == " ":

@@ -203,7 +203,7 @@ class Detector(ABC):
 
         if self.ocr == 2:
             pytesseract.pytesseract.tesseract_cmd = 'tesseract/tesseract.exe'
-            result = pytesseract.image_to_data(blur, output_type=pytesseract.Output.DICT)
+            result = pytesseract.image_to_data(blur,output_type=pytesseract.Output.DICT)
 
             results = list()
 
