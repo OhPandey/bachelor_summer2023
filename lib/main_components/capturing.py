@@ -140,7 +140,7 @@ class Capturing(Thread, Debugging, Component):
                 if ret:
                     self.capture_frame = frame
                     if self.is_processing():
-                        self.processing.add_queue(self.capture_frame)
+                        self.processing.main_buffer = self.capture_frame
                 else:
                     del self.capture
                     self.log("mainloop(): Lost camera connection")
@@ -151,12 +151,12 @@ class Capturing(Thread, Debugging, Component):
         """
         Release resources.
         """
-        self.log("release(): Releasing resources")
+        if self.is_processing() or self.is_active():
+            self.log("release(): Releasing resources")
         if self.is_processing():
             del self.processing
         if self.is_active():
             del self.capture
-        self.log("-------------------")
 
     def start(self) -> None:
         """
@@ -172,3 +172,10 @@ class Capturing(Thread, Debugging, Component):
         self.log("stop(): Thread stopped")
         super().stop()
         self.release()
+
+    def __del__(self):
+        """
+        Destructor
+        """
+        self.release()
+        self.log("-------------------")

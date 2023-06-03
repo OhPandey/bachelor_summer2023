@@ -16,13 +16,11 @@ class App(ResponseMediator, Debugging):
 
     def __init__(self, channel=0):
         Debugging.__init__(self, Subdirectory.APPLICATION)
+        self.log("__init__(): Started")
 
         self.students = Students()
-
         self.processing = Processing(self.students)
-
         self.capturing = Capturing(channel)
-
         self.gui = GUI(self.students)
 
         self.start_application()

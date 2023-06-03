@@ -16,11 +16,13 @@ class Processing(Thread, Debugging, Component):
     def __init__(self, students: Students):
         Thread.__init__(self)
         Debugging.__init__(self, Subdirectory.PROCESSING)
+        self.log("__init__(): Started")
         self._buffer_size = -1
         self._main_buffer = list()
         self._students = students
         self.detection_option = 1
         self.capture_frame = None
+        self.dropped_frames = 0
 
     @property
     def target(self) -> bool:
@@ -35,18 +37,34 @@ class Processing(Thread, Debugging, Component):
     @buffer_size.setter
     def buffer_size(self, buffer_size: int) -> None:
         self._buffer_size = buffer_size
+        self.log(f"buffer_size.setter: Buffer_size has been set to {buffer_size}")
 
     @buffer_size.deleter
     def buffer_size(self) -> None:
         self._buffer_size = -1
+        self.log(f"buffer_size.setter: Buffer_size has been removed (-1)")
 
     @property
     def main_buffer(self) -> list:
         return self._main_buffer
 
+    @main_buffer.setter
+    def main_buffer(self, e: numpy) -> None:
+        if self.is_active():
+            if self.is_main_buffer_full():
+                if self.is_debugging():
+                    self.dropped_frames += 1
+            else:
+                if self.is_debugging():
+                    if self.dropped_frames > 0:
+                        self.log(f"main_buffer.setter: {self.dropped_frames} frame(s) dropped")
+                        self.dropped_frames = 0
+                self.main_buffer.append(e)
+
     @main_buffer.deleter
     def main_buffer(self) -> None:
         self._main_buffer.clear()
+        self.log("main_buffer.deleter: main_buffer cleared")
 
     def is_active(self):
         return self.buffer_size != -1
@@ -100,12 +118,16 @@ class Processing(Thread, Debugging, Component):
             except MaxSeatError:
                 self.mediator = f"Must set Max seat first"
 
-    def add_queue(self, e: numpy) -> None:
-        if self.is_active():
-            self.main_buffer.append(e)
-
     def start(self) -> None:
+        self.log("start(): Thread started")
         super().start()
 
     def stop(self) -> None:
+        self.log("stop(): Thread stopped")
         super().stop()
+
+    def __del__(self):
+        """
+        Destructor
+        """
+        self.log("-------------------")
