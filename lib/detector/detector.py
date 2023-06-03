@@ -1,9 +1,9 @@
 from abc import ABC, abstractmethod
 import cv2
 import numpy
-from easyocr import easyocr
+import easyocr
 import pytesseract
-
+import face_recognition
 from lib.debugging.config import get_config
 from lib.utils.position import Position
 from lib.utils.processing_data import processing_data_easyocr, processing_data_tesseract
@@ -176,15 +176,16 @@ class Detector(ABC):
 
     def _text_detection(self):
         area = self._scanning_area()
-        frame = self.gray_frame[area.y1:area.y2, area.x1:area.x2]
-        blur = cv2.GaussianBlur(frame, (5, 5), 1)
+        gray_frame = self.gray_frame[area.y1:area.y2, area.x1:area.x2]
+        frame = cv2.GaussianBlur(gray_frame, (5, 5), 1)
 
         # Debugging:
         # cv2.imwrite('debugging/realtest.jpg', blur)
 
         if self.ocr == 1:
+            # Easyocr
             reader = easyocr.Reader(['en'], gpu=True)
-            all_results = reader.readtext(blur)
+            all_results = reader.readtext(frame)
             if all_results is None:
                 return None
 
@@ -193,7 +194,7 @@ class Detector(ABC):
             for place, text, prob in all_results:
                 if prob >= 0.5:
                     # Debugging
-                    print(f'Detected text: {text}, {prob:.2f}')
+                    print(f'Text: {text}, Confidence {prob:.2f}')
                     results.append(text)
 
             if len(results) < 3:
@@ -202,8 +203,9 @@ class Detector(ABC):
             return processing_data_easyocr(results)
 
         if self.ocr == 2:
-            pytesseract.pytesseract.tesseract_cmd = 'tesseract/tesseract.exe'
-            result = pytesseract.image_to_data(blur, output_type=pytesseract.Output.DICT)
+            # Tesseract
+            pytesseract.pytesseract.tesseract_cmd = 'ocr/tesseract/tesseract.exe'
+            result = pytesseract.image_to_data(frame, output_type=pytesseract.Output.DICT)
 
             results = list()
 
@@ -211,7 +213,7 @@ class Detector(ABC):
                 prob = int(result['conf'][i])
                 if prob >= 90:
                     # Debugging
-                    print(f"Word: {text}, Confidence: {prob}")
+                    print(f"Word: {text}, Confidence: {prob}%")
                     results.append(text)
 
             if len(results) < 3:
@@ -220,6 +222,19 @@ class Detector(ABC):
             return processing_data_tesseract(results)
 
         return None
+
+    def _face_recognition(self):
+        reference_image = face_recognition.load_image_file('AN IMAGE')
+        target_image = self.face
+
+        results = face_recognition.compare_faces(face_recognition.face_encodings(reference_image)[0],
+                                                 face_recognition.face_encodings(target_image)[0])
+
+        if results[0]:
+            print("The faces match!")
+        else:
+            print("The faces do not match.")
+
 
     # Debugging
     def draw_rectangle(self) -> numpy:
@@ -272,8 +287,7 @@ class Detector(ABC):
 
             scan_textx = cv2.putText(scan,
                                      f"{scan_position.get_width()} px",
-                                     (
-                                     int(scan_position.x1 + scan_position.get_width() / 2 - 50), scan_position.y1 + 30),
+                                     (int(scan_position.x1 + scan_position.get_width() / 2 - 50), scan_position.y1 + 30),
                                      cv2.FONT_HERSHEY_SIMPLEX,
                                      1,
                                      (0, 255, 0),

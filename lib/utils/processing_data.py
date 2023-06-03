@@ -42,7 +42,7 @@ def is_student_id(value):
     if match:
         return match.group()
 
-    return int()
+    return None
 
 
 def is_year(value):
@@ -51,7 +51,7 @@ def is_year(value):
         if 1900 <= int(match.group()) < datetime.now().year:
             return match.group()
 
-    return int()
+    return None
 
 
 def is_month(value):
@@ -60,7 +60,7 @@ def is_month(value):
     if match:
         return match.group()
 
-    return str()
+    return None
 
 
 def is_day(value):
@@ -69,7 +69,7 @@ def is_day(value):
         if 0 < int(match.group()) <= 31:
             return match.group()
 
-    return int()
+    return None
 
 
 def processing_data_easyocr(data_list: list):
@@ -95,22 +95,22 @@ def processing_data(data_list: list):
             continue
 
         result = is_student_id(element)
-        if result is not int():
+        if result is not None:
             data["student_id"] = result
             continue
 
         result = is_year(element)
-        if result is not int():
+        if result is not None:
             data["birth_year"] = result
             continue
 
         result = is_month(element)
-        if result is not str():
+        if result is not None:
             data["birth_month"] = result
             continue
 
         result = is_day(element)
-        if result is not int():
+        if result is not None:
             data["birth_day"] = result
             continue
 
