@@ -20,7 +20,7 @@ class Capturing(Thread, Debugging, Component):
 
     def __init__(self, channel: int):
         """
-        Constructor
+        Constructor.
 
         :param channel: The channel number for the video capture.
         :type channel: int
