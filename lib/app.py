@@ -2,7 +2,7 @@ import time
 
 from lib.data.students import Students
 from lib.debugging import config
-from lib.debugging.log import write_log
+from lib.debugging.debugging import Debugging
 from lib.debugging.subdirectory import Subdirectory
 from lib.interfaces.mediator.responsemediator import ResponseMediator
 from lib.main_components.gui import GUI
@@ -10,11 +10,13 @@ from lib.main_components.processing import Processing
 from lib.main_components.capturing import Capturing
 
 
-class App(ResponseMediator):
+class App(ResponseMediator, Debugging):
     processing_time = None
     capturing_time = None
 
     def __init__(self, channel=0):
+        Debugging.__init__(self, Subdirectory.APPLICATION)
+
         self.students = Students()
 
         self.processing = Processing(self.students)
@@ -52,31 +54,31 @@ class App(ResponseMediator):
             self.processing.mediator = self
             self._start_processing()
         else:
-            write_log(f"Processing Thread could not be started", Subdirectory.APPLICATION)
+            self.log(f"Processing Thread could not be started")
 
         if self.capturing is not None:
             self.capturing.processing = self.processing
             self.capturing.mediator = self
             self._start_capturing()
         else:
-            write_log(f"Capturing Thread could not be started", Subdirectory.APPLICATION)
+            self.log(f"Capturing Thread could not be started")
 
         if self.gui is not None:
             self._start_gui()
         else:
-            write_log(f"GUI Thread could not be started", Subdirectory.APPLICATION)
+            self.log(f"GUI Thread could not be started")
 
         self.exit()
 
     def _start_processing(self) -> None:
         self.processing.start()
         self.processing_time = time.time()
-        write_log(f"Processing Thread started", Subdirectory.APPLICATION)
+        self.log(f"Processing Thread started")
 
     def _start_capturing(self) -> None:
         self.capturing.start()
         self.capturing_time = time.time()
-        write_log(f"Capturing Thread started", Subdirectory.APPLICATION)
+        self.log(f"Capturing Thread started")
 
     def _start_gui(self) -> None:
         self.stream()
@@ -87,13 +89,11 @@ class App(ResponseMediator):
         if self.capturing is not None:
             self.capturing.stop()
             if self.capturing_time is not None:
-                write_log(f"Capturing Thread closed after {round(time.time()-self.capturing_time, 3)} seconds",
-                          Subdirectory.APPLICATION)
+                self.log(f"Capturing Thread closed after {round(time.time()-self.capturing_time, 3)} seconds")
 
         if self.processing is not None:
             self.processing.stop()
             if self.processing_time is not None:
-                write_log(f"Processing Thread closed after {round(time.time()-self.processing_time, 3)} seconds",
-                          Subdirectory.APPLICATION)
+                self.log(f"Processing Thread closed after {round(time.time()-self.processing_time, 3)} seconds")
 
-        write_log(f"-------------------", Subdirectory.APPLICATION)
+        self.log(f"-------------------")

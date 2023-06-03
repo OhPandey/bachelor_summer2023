@@ -27,6 +27,7 @@ class Capturing(Thread, Debugging, Component):
         """
         Thread.__init__(self)
         Debugging.__init__(self, Subdirectory.CAPTURING)
+        self.log("__init__(): Started")
         self.capture = channel
 
     @property
@@ -52,8 +53,11 @@ class Capturing(Thread, Debugging, Component):
             self.width = int(self.capture.get(cv2.CAP_PROP_FRAME_WIDTH))
             self.height = int(self.capture.get(cv2.CAP_PROP_FRAME_HEIGHT))
             self.fps = int(self.capture.get(cv2.CAP_PROP_FPS))
+            self.log(f"capture.setter: Capture with channel {channel} initialized. "
+                     f"Width: {self.width}, Height: {self.height}, FPS: {self.fps}")
         else:
             del self.capture
+            self.log(f"Capture with channel {channel} not available.")
             raise CameraNotAvailable
 
     @capture.deleter
@@ -62,6 +66,7 @@ class Capturing(Thread, Debugging, Component):
         Release the video capture instance.
         """
         if self._capture:
+            self.log(f"capture.deleter: Capture released.")
             self._capture.release()
         self._capture = None
         self.width = -1
@@ -96,23 +101,25 @@ class Capturing(Thread, Debugging, Component):
         :type processing: Processing
         """
         if self._processing is not None:
-            self.log(f"add_processing(): Processing is already assigned")
+            self.log(f"processing.setter: Tried to add a processing that was already active")
             raise ProcessingNotAvailableError()
 
         self._processing = processing
         self._processing.buffer_size = self.fps
+        self.log(f"processing.setter: Processing added. Set Buffer_size to {self.fps}")
 
     @processing.deleter
     def processing(self) -> None:
         """
         Delete the processing instance.
         """
-        if self._processing is None:
-            self.log(f"remove_processing(): Tried to remove an empty processing")
+        if not self.is_processing():
+            self.log(f"remove_processing(): Tried to remove an processing that is None")
             raise ProcessingNotAvailableError()
 
         del self.processing.buffer_size
         self._processing = None
+        self.log(f"processing.deleter: Processing removed")
 
     def is_processing(self):
         """
@@ -136,7 +143,7 @@ class Capturing(Thread, Debugging, Component):
                         self.processing.add_queue(self.capture_frame)
                 else:
                     del self.capture
-                    self.log("Lost camera connection")
+                    self.log("mainloop(): Lost camera connection")
             else:
                 time.sleep(0.1)
 
@@ -144,26 +151,24 @@ class Capturing(Thread, Debugging, Component):
         """
         Release resources.
         """
+        self.log("release(): Releasing resources")
         if self.is_processing():
             del self.processing
         if self.is_active():
             del self.capture
+        self.log("-------------------")
 
     def start(self) -> None:
         """
         Start the capturing thread
         """
+        self.log("start(): Thread started")
         super().start()
 
     def stop(self) -> None:
         """
         Stop the capturing thread.
         """
+        self.log("stop(): Thread stopped")
         super().stop()
-        self.release()
-
-    def __del__(self):
-        """
-        Destructor
-        """
         self.release()
