@@ -5,6 +5,8 @@ import easyocr
 import pytesseract
 import face_recognition
 from lib.debugging.config import get_config, change_config, write_config
+from lib.debugging.log import write_log
+from lib.debugging.subdirectory import Subdirectory
 from lib.utils.position import Position
 from lib.utils.processing_data import processing_data_easyocr, processing_data_tesseract
 
@@ -20,31 +22,111 @@ class Detector(ABC):
 
     # Settings
     @property
-    def card_width(self):
-        return get_config('detector', 'card_width')
+    def card_width(self) -> float:
+        """
+        Get the width of the card from the configuration.
+
+        This property determines the required width of the card that must be captured within the frame for it to be
+        considered valid.
+
+        :return: The width of the card as specified in the configuration.
+        :rtype: float
+        """
+        data = get_config('detector', 'card_width')
+        try:
+            data = float(data)
+            if 0 <= data <= 1:
+                return data
+            else:
+                return 0.5  # Default value
+        except ValueError:
+            return 0.5  # Default value
 
     @card_width.setter
-    def card_width(self, value):
-        change_config('detector', 'card_width', value)
-        write_config()
+    def card_width(self, value: float) -> None:
+        """
+        Set the width of the card in the configuration.
+
+        :param value: The new width value for the configuration
+        :type value: None
+
+        """
+        if 0 <= value <= 1:
+            change_config('detector', 'card_width', str(value))
+            write_config()
+        else:
+            write_log("card_width.setter: Card with has to be between 0 and 1 (float)", Subdirectory.DETECTOR)
 
     @property
     def card_height(self):
-        return get_config('detector', 'card_height')
+        """
+        Get the height of the card from the configuration.
+
+        This property determines the required height of the card that must be captured within the frame for it to be
+        considered valid.
+
+        :return: The height of the card as specified in the configuration.
+        :rtype: float
+        """
+        data = get_config('detector', 'card_height')
+        try:
+            data = float(data)
+            if 0 <= data <= 1:
+                return data
+            else:
+                return 0.5  # Default value
+        except ValueError:
+            return 0.5  # Default value
 
     @card_height.setter
-    def card_height(self, value):
-        change_config('detector', 'card_height', value)
-        write_config()
+    def card_height(self, value: float) -> None:
+        """
+        Set the height of the card in the configuration.
+
+        :param value: The new height value for the configuration
+        :type value: None
+
+        """
+        if 0 <= value <= 1:
+            change_config('detector', 'card_height', str(value))
+            write_config()
+        else:
+            write_log("card_height.setter: Card with has to be between 0 and 1 (float)", Subdirectory.DETECTOR)
 
     @property
-    def ocr(self):
-        return get_config('detector', 'ocr')
+    def ocr(self) -> int:
+        """
+        Get the OCR setting from the configuration.
+
+        This property determines which OCR is being used.
+
+        :return: The current OCR setting.
+        :rtype: int
+        """
+
+        data = get_config('detector', 'ocr')
+        try:
+            data = int(data)
+            if 0 <= data <= 1:
+                return data
+            else:
+                return 0  # Default value
+        except ValueError:
+            return 0  # Default value
 
     @ocr.setter
-    def ocr(self, value):
-        change_config('detector', 'ocr', value)
-        write_config()
+    def ocr(self, value: int) -> None:
+        """
+        Set the OCR setting in the configuration.
+
+        :param value: The new OCR setting.
+        :type value: None
+        """
+        if value in [0, 1]:
+            change_config('detector', 'ocr', str(value))
+            write_config()
+        else:
+            write_log("ocr.setter: Card with has to be between 0 or 1 (int)", Subdirectory.DETECTOR)
 
     # Image Functions
     @property
@@ -316,7 +398,8 @@ class Detector(ABC):
             scan_textx = cv2.putText(scan,
                                      f"{scan_position.get_width()} px",
                                      (
-                                     int(scan_position.x1 + scan_position.get_width() / 2 - 50), scan_position.y1 + 30),
+                                         int(scan_position.x1 + scan_position.get_width() / 2 - 50),
+                                         scan_position.y1 + 30),
                                      cv2.FONT_HERSHEY_SIMPLEX,
                                      1,
                                      (0, 255, 0),

@@ -20,12 +20,11 @@ class Processing(Thread, Debugging, Component):
         self._main_buffer = list()
         self._students = students
         self.detection_option = 1
-        self._target = config.get_config('project', 'show_target')
         self.capture_frame = None
 
     @property
     def target(self) -> bool:
-        if self._target == "True":
+        if config.get_config('project', 'show_target') == "True":
             return True
         return False
 
@@ -65,10 +64,7 @@ class Processing(Thread, Debugging, Component):
                     time.sleep(0.1)
                 if self.is_main_buffer_full():
                     if self.get_detection(self.main_buffer[0]).is_card():
-                        if self.target is True:
-                            self.mediator.set_response("Is a student card.")
-                        else:
-                            self._run()
+                        self._run()
                     del self.main_buffer
             else:
                 time.sleep(0.1)
@@ -93,16 +89,16 @@ class Processing(Thread, Debugging, Component):
         data = detectors[index].get_data()
 
         if data is None:
-            self.mediator.set_response("Student Card could not be read")
+            self.mediator = "Student Card could not be read"
             self.log("_run(): Data was None")
         else:
             try:
                 self._students.students_list = data
-                self.mediator.set_response(f"Student '{data['last_name']} {data['first_name']}' has been added")
+                self.mediator = f"Student '{data['last_name']} {data['first_name']}' has been added"
             except AddingStudentError as error:
                 self.log(f"_run(): {error}")
             except MaxSeatError:
-                self.mediator.set_response(f"Must set Max seat first")
+                self.mediator = f"Must set Max seat first"
 
     def add_queue(self, e: numpy) -> None:
         if self.is_active():
