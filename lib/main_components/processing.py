@@ -90,7 +90,7 @@ class Processing(Thread, Debugging, Component):
                 highest_quality = quality
                 index = i
 
-        data = detectors[index].retrieve_data()
+        data = detectors[index].get_data()
 
         if data is None:
             self.mediator.set_response("Student Card could not be read")

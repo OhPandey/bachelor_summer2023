@@ -4,17 +4,12 @@ import numpy
 import easyocr
 import pytesseract
 import face_recognition
-from lib.debugging.config import get_config
+from lib.debugging.config import get_config, change_config, write_config
 from lib.utils.position import Position
 from lib.utils.processing_data import processing_data_easyocr, processing_data_tesseract
 
 
 class Detector(ABC):
-    # Configuration
-    face_size = 80
-    face_offset = 20
-    card_width = 0.5
-    card_height = 0.5
 
     def __init__(self, frame):
         self._frame = frame
@@ -22,7 +17,34 @@ class Detector(ABC):
         self._quality = None
         self._face = None
         self._card = None
-        self.ocr = 2
+
+    # Settings
+    @property
+    def card_width(self):
+        return get_config('detector', 'card_width')
+
+    @card_width.setter
+    def card_width(self, value):
+        change_config('detector', 'card_width', value)
+        write_config()
+
+    @property
+    def card_height(self):
+        return get_config('detector', 'card_height')
+
+    @card_height.setter
+    def card_height(self, value):
+        change_config('detector', 'card_height', value)
+        write_config()
+
+    @property
+    def ocr(self):
+        return get_config('detector', 'ocr')
+
+    @ocr.setter
+    def ocr(self, value):
+        change_config('detector', 'ocr', value)
+        write_config()
 
     # Image Functions
     @property
@@ -154,7 +176,14 @@ class Detector(ABC):
         pass
 
     # Text-detection Functions
-    def retrieve_data(self):
+    def get_data(self) -> dict | None:
+        """
+        Gives the student data of the current frame.
+
+        :return: A dict(ionary) with all the student data. Returns None if there is no data on the frame.
+        :type: dict | None
+        """
+
         if self.card is None:
             return None
         return self._text_detection()
@@ -235,7 +264,6 @@ class Detector(ABC):
         else:
             print("The faces do not match.")
 
-
     # Debugging
     def draw_rectangle(self) -> numpy:
         """
@@ -287,7 +315,8 @@ class Detector(ABC):
 
             scan_textx = cv2.putText(scan,
                                      f"{scan_position.get_width()} px",
-                                     (int(scan_position.x1 + scan_position.get_width() / 2 - 50), scan_position.y1 + 30),
+                                     (
+                                     int(scan_position.x1 + scan_position.get_width() / 2 - 50), scan_position.y1 + 30),
                                      cv2.FONT_HERSHEY_SIMPLEX,
                                      1,
                                      (0, 255, 0),
