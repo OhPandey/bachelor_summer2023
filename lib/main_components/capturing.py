@@ -19,16 +19,34 @@ class Capturing(Thread, Debugging, Component):
     fps: int = None
 
     def __init__(self, channel: int):
+        """
+        Constructor
+
+        :param channel: The channel number for the video capture.
+        :type channel: int
+        """
         Thread.__init__(self)
         Debugging.__init__(self, Subdirectory.CAPTURING)
         self.capture = channel
 
     @property
-    def capture(self):
+    def capture(self) -> cv2.VideoCapture | None:
+        """
+        Get the video capture instance.
+
+        :return: The video capture instance.
+        :rtype: VideoCapture | None
+        """
         return self._capture
 
     @capture.setter
     def capture(self, channel: int) -> None:
+        """
+        Set the video capture instance.
+
+        :param channel: The channel number for the video capture.
+        :type channel: int
+         """
         self._capture = cv2.VideoCapture(channel)
         if self._capture.isOpened():
             self.width = int(self.capture.get(cv2.CAP_PROP_FRAME_WIDTH))
@@ -40,6 +58,9 @@ class Capturing(Thread, Debugging, Component):
 
     @capture.deleter
     def capture(self) -> None:
+        """
+        Release the video capture instance.
+        """
         if self._capture:
             self._capture.release()
         self._capture = None
@@ -48,14 +69,32 @@ class Capturing(Thread, Debugging, Component):
         self.fps = -1
 
     def is_active(self) -> bool:
+        """
+        Check if the video capture instance is active.
+
+        :return: True if video capture instance is active, False otherwise.
+        :rtype: bool
+        """
         return self.capture is not None
 
     @property
     def processing(self) -> Processing | None:
+        """
+        Get the processing instance.
+
+        :return: The processing instance.
+        :rtype: Processing | None
+        """
         return self._processing
 
     @processing.setter
     def processing(self, processing: Processing) -> None:
+        """
+        Set the processing instance.
+
+        :param processing: The processing instance.
+        :type processing: Processing
+        """
         if self._processing is not None:
             self.log(f"add_processing(): Processing is already assigned")
             raise ProcessingNotAvailableError()
@@ -65,6 +104,9 @@ class Capturing(Thread, Debugging, Component):
 
     @processing.deleter
     def processing(self) -> None:
+        """
+        Delete the processing instance.
+        """
         if self._processing is None:
             self.log(f"remove_processing(): Tried to remove an empty processing")
             raise ProcessingNotAvailableError()
@@ -73,9 +115,18 @@ class Capturing(Thread, Debugging, Component):
         self._processing = None
 
     def is_processing(self):
+        """
+        Check if the processing instance is active
+
+        :return: True if the processing instance is active, False otherwise.
+        :rtype: bool
+        """
         return self.processing is not None
 
     def _mainloop(self) -> None:
+        """
+        Main loop for capturing frames (and sending them to processing).
+        """
         while self._running:
             if self.is_active():
                 ret, frame = self.capture.read()
@@ -90,17 +141,29 @@ class Capturing(Thread, Debugging, Component):
                 time.sleep(0.1)
 
     def release(self) -> None:
+        """
+        Release resources.
+        """
         if self.is_processing():
             del self.processing
         if self.is_active():
             del self.capture
 
     def start(self) -> None:
+        """
+        Start the capturing thread
+        """
         super().start()
 
     def stop(self) -> None:
+        """
+        Stop the capturing thread.
+        """
         super().stop()
         self.release()
 
     def __del__(self):
+        """
+        Destructor
+        """
         self.release()
