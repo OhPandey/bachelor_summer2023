@@ -140,8 +140,13 @@ class Processing(Thread, Debugging, Component):
                 else:
                     time.sleep(0.1)
                 if self.is_main_buffer_full():
-                    if self.get_detection(self.main_buffer[0]).is_card():
+                    card_result = self.get_detection(self.main_buffer[0]).card_check()
+                    if card_result == 0:
                         self._run()
+                    if card_result == 1:
+                        self.mediator.response = "Card is too far away"
+                    if card_result == 2:
+                        self.mediator.response = "Card is not fully visible"
                     del self.main_buffer
             else:
                 time.sleep(0.1)
@@ -174,16 +179,16 @@ class Processing(Thread, Debugging, Component):
         data = detectors[index].get_data()
 
         if data is None:
-            self.mediator = "Student Card could not be read"
+            self.mediator.response = "Student Card could not be read"
             self.log("run(): Data was None")
         else:
             try:
                 self._students.students_list = data
-                self.mediator = f"Student '{data['last_name']} {data['first_name']}' has been added"
+                self.mediator.response = f"Student '{data['last_name']} {data['first_name']}' has been added"
             except AddingStudentError as error:
                 self.log(f"run(): {error}")
             except MaxSeatError:
-                self.mediator = f"Must set Max seat first"
+                self.mediator.response = f"Must set Max seat first"
 
     def start(self) -> None:
         """

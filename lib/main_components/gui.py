@@ -56,7 +56,7 @@ class GUI(customtkinter.CTk):
         self.capture_frame.grid(row=0, column=1, padx=(20, 20), pady=(20, 20), sticky="nsew")
         # Interactive Response Label Widget
         self.info_label = customtkinter.CTkLabel(self.capture_frame,
-                                                 text="<Students Card Detector>",
+                                                 text="Students Card Detector",
                                                  font=customtkinter.CTkFont(size=20, weight="bold"),
                                                  width=1200)
         self.info_label.grid(row=0, column=0, padx=5, pady=(10, 10), sticky="")

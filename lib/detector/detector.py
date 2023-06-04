@@ -195,7 +195,7 @@ class Detector(ABC):
 
     # Card Function
     @abstractmethod
-    def card(self) -> Position:
+    def card(self) -> Position | None:
         """
         Returns the location of the student card.
 
@@ -211,8 +211,10 @@ class Detector(ABC):
         :return: True if the card is outside the frame, False otherwise.
         :rtype: bool
         """
+        if self.card is None:
+            return False
         h, w, z = self.frame.shape
-        return bool(self.card().x1 < 0 or self.card().y2 < 0 or self.card().x2 > w or self.card().y2 > h)
+        return bool(self.card.x1 < 0 or self.card.y2 < 0 or self.card.x2 > w or self.card.y2 > h)
 
     def _is_card_too_far(self):
         """
@@ -222,7 +224,7 @@ class Detector(ABC):
         :rtype: bool
         """
         h, w, z = self.frame.shape
-        return bool(self.card().get_width() < w * self.card_width or self._card.get_height() < h * self.card_height)
+        return bool(self.card.get_width() < w * self.card_width or self.card.get_height() < h * self.card_height)
 
     def card_check(self) -> int:
         """
@@ -235,7 +237,8 @@ class Detector(ABC):
             - 3: No card detected. (Should never occur)
         :rtype: int
         """
-        if self.card() is None:
+
+        if self.card is None:
             return 3
 
         if self._is_card_outside_of_frame():
@@ -247,7 +250,7 @@ class Detector(ABC):
         return 0
 
     @abstractmethod
-    def is_card(self):
+    def _is_card(self):
         """
         Determines whether the current frame has a student card or not.
 

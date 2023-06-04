@@ -15,11 +15,10 @@ from lib.utils.position import Position
 # It checks the card in a normal non-machine learning approach
 # but takes advantage of the face recognition (that is easily available) to find the card position
 class HMLDetector(Detector, Debugging):
-
     template = "truetemplate.jpg"
 
     @property
-    def card(self) -> Position:
+    def card(self) -> Position | None:
         """
         Getter method for the card position
 
@@ -31,7 +30,7 @@ class HMLDetector(Detector, Debugging):
         :rtype: Position
         """
         if self._card is None:
-            if self.is_card():
+            if self._is_card():
                 face = self.face
                 if face is not None:
                     x1 = face.x1 - round(face.get_width(4.25))
@@ -43,7 +42,7 @@ class HMLDetector(Detector, Debugging):
 
         return self._card
 
-    def is_card(self) -> bool:
+    def _is_card(self) -> bool:
         return bool(self._is_template() and self._is_enough_features())
 
     def _is_template(self):
