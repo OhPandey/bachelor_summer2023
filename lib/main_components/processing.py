@@ -8,7 +8,7 @@ from lib.debugging.subdirectory import Subdirectory
 from lib.detector.detector import Detector
 from lib.detector.hmldetector import HMLDetector
 from lib.interfaces.mediator.component import Component
-from lib.utils.exceptions import AddingStudentError, MaxSeatError
+from lib.utils.exceptions import AddingStudentError, NoMaxSeatError, NoSeatAvailableError
 from lib.interfaces.thread.thread import Thread
 
 
@@ -187,8 +187,10 @@ class Processing(Thread, Debugging, Component):
                 self.mediator.response = f"Student '{data['last_name']} {data['first_name']}' has been added"
             except AddingStudentError as error:
                 self.log(f"run(): {error}")
-            except MaxSeatError:
-                self.mediator.response = f"Must set Max seat first"
+            except NoSeatAvailableError:
+                self.mediator.response = f"There is no more seat available. Either save it or delete some students"
+            except NoMaxSeatError:
+                self.mediator.response = f"Please enter available seats"
 
     def start(self) -> None:
         """

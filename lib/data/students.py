@@ -4,7 +4,7 @@ import csv
 
 from datetime import datetime
 from lib.data.student import Student
-from lib.utils.exceptions import AddingStudentError, MaxSeatError
+from lib.utils.exceptions import AddingStudentError, NoSeatAvailableError, NoMaxSeatError
 from fpdf import FPDF
 from lib.data.dataset import STUDENT_REQUIRED_KEYS
 
@@ -18,6 +18,7 @@ class Students:
         """
         self._students_list = list()
         self._seat_list = None
+        self._max_seat = None
 
     # student_list functions
     @property
@@ -53,8 +54,11 @@ class Students:
         if self.is_duplicate(data["student_id"]):
             raise AddingStudentError("The data given is a duplicate")
 
-        if self.seat_list <= 0:
-            raise MaxSeatError
+        if self.seat_list == -1:
+            raise NoMaxSeatError(Exception)
+
+        if self.seat_list == 0:
+            raise NoSeatAvailableError(Exception)
 
         val = self._seat_list[random.randint(0, self.seat_list - 1)]
         self._seat_list.remove(val)
@@ -152,13 +156,15 @@ class Students:
         :param size: The size of the seat list.
         :type size: int
         """
-        self._seat_list = list(range(1, size+1))
+        self._max_seat = size
+        self._seat_list = list(range(1, size + 1))
 
     @seat_list.deleter
     def seat_list(self) -> None:
         """
         Clear the seat list.
         """
+        self._max_seat = None
         self._seat_list = None
 
     def is_seat_list(self) -> bool:
@@ -169,6 +175,18 @@ class Students:
         :rtype: bool
         """
         return self.seat_list >= 0
+
+    @property
+    def max_seat(self) -> int:
+        """
+        Get the number of maximum seats.
+
+        :return: The number of maximum seats.
+        :rtype: int
+        """
+        if self._max_seat is None:
+            return -1
+        return self._max_seat
 
     # Saving file functions
     def set_filename(self, filename):
@@ -187,12 +205,12 @@ class Students:
         pdf = FPDF()
         pdf.add_page()
         pdf.set_font("Arial", size=15)
-
-        for i, x in enumerate(self._students_list):
-            if not isinstance(x, Student):
-                text = f"<Error retrieving student#{i}>"
-            else:
-                text = f"{x.last_name} {x.first_name}, {x.birth_day}. {x.birth_month} {x.birth_year}, {x.student_id}, SEAT: {x.seat}"
+        pdf.cell(200, 5, txt=f"There are {str(len(self.students_list))} students assigned.", ln=1)
+        for i in range(1, self.max_seat+1):
+            text = f"{i}. Empty seat"
+            for e in self.students_list:
+                if e.seat == i:
+                    text = f"{i}. ({e.student_id}) {e.last_name} {e.first_name} - {e.birth_day}. {e.birth_month} {e.birth_year}"
             pdf.cell(200, 5, txt=text, ln=1)
 
         pdf.output(f"{self.filename}.pdf")

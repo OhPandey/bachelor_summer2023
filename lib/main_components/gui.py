@@ -10,7 +10,6 @@ class GUI(customtkinter.CTk):
     def __init__(self, students):
         super().__init__()
         self.camera_found = False
-        self.max_seat = None
         self.students = students
         # configure window
         self.title("Student Card Scanner.py")
@@ -20,7 +19,7 @@ class GUI(customtkinter.CTk):
         self.grid_rowconfigure(0, weight=1)
 
         # Side frame
-        self.sidebar_frame = customtkinter.CTkFrame(self, width=140, corner_radius=1)
+        self.sidebar_frame = customtkinter.CTkFrame(self, width=120, corner_radius=1)
         self.sidebar_frame.grid(row=0, column=0, rowspan=4, sticky="nsew")
         self.sidebar_frame.grid_rowconfigure(4, weight=1)
         # Student List Title Widget
@@ -31,7 +30,7 @@ class GUI(customtkinter.CTk):
         # Student List Widget
         self.students_list = ScrollableLabelButtonFrame(master=self.sidebar_frame,
                                                         students=self.students,
-                                                        width=250, height=500,
+                                                        width=200, height=400,
                                                         corner_radius=0)
         self.students_list.grid(row=1, column=0, padx=0, pady=0, sticky="nsew")
         # Maximum Seat Title Widget
@@ -42,15 +41,39 @@ class GUI(customtkinter.CTk):
         self.max_seat_label.grid(row=2, column=0, padx=20, pady=(10, 0))
         # Maximum Seat Input Widget
         self.max_seat_input = customtkinter.CTkEntry(self.sidebar_frame,
-                                                     placeholder_text="Type your number here",
-                                                     width=190)
+                                                     placeholder_text="Type available seats",
+                                                     width=130)
         self.max_seat_input.grid(row=3, column=0, padx=10, pady=20, sticky="w")
         # Maximum Seat Button Widget
         self.max_seat_button = customtkinter.CTkButton(self.sidebar_frame,
                                                        text="Set",
-                                                       width=50,
+                                                       width=60,
                                                        command=self.max_set_button_event)
         self.max_seat_button.grid(row=3, column=0, padx=10, pady=20, sticky="e")
+
+        # Saving
+
+        self.save_label = customtkinter.CTkLabel(self.sidebar_frame,
+                                                 text="Save as",
+                                                 font=customtkinter.CTkFont(size=15, weight="bold"))
+        self.save_label.grid(row=4, column=0, padx=10, sticky="n")
+
+        self.pdf_button = customtkinter.CTkButton(self.sidebar_frame,
+                                                  text="PDF",
+                                                  width=60,
+                                                  command=self.save_as_pdf)
+        self.pdf_button.grid(row=4, column=0, padx=10, pady=20, sticky="sw")
+        self.csv_button = customtkinter.CTkButton(self.sidebar_frame,
+                                                  text="CSV",
+                                                  width=60,
+                                                  command=self.save_as_csv)
+        self.csv_button.grid(row=4, column=0, padx=(78, 0), pady=20, sticky="sw")
+
+        self.json_button = customtkinter.CTkButton(self.sidebar_frame,
+                                                   text="Json",
+                                                   width=60,
+                                                   command=self.save_as_json)
+        self.json_button.grid(row=4, column=0, padx=(10, 10), pady=20, sticky="se")
 
         # Main frame
         self.capture_frame = customtkinter.CTkFrame(self)
@@ -60,13 +83,34 @@ class GUI(customtkinter.CTk):
                                                  text="Camera not found",
                                                  font=customtkinter.CTkFont(size=20, weight="bold"),
                                                  width=1200)
-        self.info_label.grid(row=0, column=0, padx=5, pady=(10, 10), sticky="")
+        self.info_label.grid(row=0, column=0, padx=5, pady=(10, 10))
         # Camera Widget
         default_image = customtkinter.CTkImage(Image.open('video-not-working.png'), size=(635, 328))
         self.stream_label = customtkinter.CTkLabel(self.capture_frame,
                                                    text="",
                                                    image=default_image)
         self.stream_label.grid(row=1, column=0, padx=20, pady=10)
+
+    def save_as_pdf(self):
+        if len(self.students.students_list) > 0:
+            self.students.save_as_pdf()
+            del self.students.students_list
+            del self.students.seat_list
+            self.students_list.remove_all()
+
+    def save_as_csv(self):
+        if len(self.students.students_list) > 0:
+            self.students.save_as_csv()
+            del self.students.students_list
+            del self.students.seat_list
+            self.students_list.remove_all()
+
+    def save_as_json(self):
+        if len(self.students.students_list) > 0:
+            self.students.save_as_json()
+            del self.students.students_list
+            del self.students.seat_list
+            self.students_list.remove_all()
 
     def stream(self, capture):
         if capture is not None:
@@ -79,11 +123,11 @@ class GUI(customtkinter.CTk):
             if self.winfo_height() < 650:
                 self.geometry(f"{self.winfo_width()}x{650}")
 
-            if self.winfo_width() < (w+950):
+            if self.winfo_width() < (w + 950):
                 self.geometry(f"{w + 950}x{self.winfo_height()}")
             img = Image.fromarray(cv2.cvtColor(capture, cv2.COLOR_BGR2RGB))
             de = customtkinter.CTkImage(img, size=(
-                self.capture_frame.winfo_width() - 60, self.capture_frame.winfo_height() - 100))
+                self.capture_frame.winfo_width() - 40, self.capture_frame.winfo_height() - 100))
 
             self.stream_label.configure(image=de)
 
@@ -94,13 +138,19 @@ class GUI(customtkinter.CTk):
         if number == -1:
             self.max_seat_label.configure(text="How many seats?")
         else:
-            self.max_seat_label.configure(text=f"{str(number)}/{str(self.max_seat)} seats available")
+            self.max_seat_label.configure(text=f"{str(number)}/{str(self.students.max_seat)} seats available")
 
     def update(self):
         if self.students.is_seat_list():
+            self.pdf_button.configure(state="normal")
+            self.csv_button.configure(state="normal")
+            self.json_button.configure(state="normal")
             self.max_seat_button.configure(state="disabled")
             self.max_seat_input.configure(state="disabled")
         else:
+            self.pdf_button.configure(state="disabled")
+            self.csv_button.configure(state="disabled")
+            self.json_button.configure(state="disabled")
             self.max_seat_button.configure(state="normal")
             self.max_seat_input.configure(state="normal")
 
@@ -117,7 +167,6 @@ class GUI(customtkinter.CTk):
 
 
 class ScrollableLabelButtonFrame(customtkinter.CTkScrollableFrame):
-    # Doing this frame with customtkinter wasn't easy. Had to find a lot of workarounds
     def __init__(self, master, students, command=None, **kwargs):
         super().__init__(master, **kwargs)
         self.grid_columnconfigure(0, weight=1)
@@ -156,3 +205,12 @@ class ScrollableLabelButtonFrame(customtkinter.CTkScrollableFrame):
                 self.label_list.remove(label)
                 self.button_list.remove(button)
                 return
+
+    def remove_all(self):
+        for label in self.label_list:
+            label.destroy()
+        self.label_list.clear()
+
+        for button in self.button_list:
+            button.destroy()
+        self.button_list.clear()

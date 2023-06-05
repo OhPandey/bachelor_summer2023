@@ -6,7 +6,11 @@ class AddingStudentError(Exception):
         return self.message
 
 
-class MaxSeatError(Exception):
+class NoSeatAvailableError(Exception):
+    pass
+
+
+class NoMaxSeatError(Exception):
     pass
 
 
