@@ -9,11 +9,12 @@ from PIL import Image, ImageTk
 class GUI(customtkinter.CTk):
     def __init__(self, students):
         super().__init__()
+        self.camera_found = False
         self.max_seat = None
         self.students = students
         # configure window
         self.title("Student Card Scanner.py")
-        self.geometry(f"{1500}x{750}")
+        self.geometry(f"{1400}x{650}")
 
         self.grid_columnconfigure(1, weight=1)
         self.grid_rowconfigure(0, weight=1)
@@ -30,7 +31,7 @@ class GUI(customtkinter.CTk):
         # Student List Widget
         self.students_list = ScrollableLabelButtonFrame(master=self.sidebar_frame,
                                                         students=self.students,
-                                                        width=250, height=600,
+                                                        width=250, height=500,
                                                         corner_radius=0)
         self.students_list.grid(row=1, column=0, padx=0, pady=0, sticky="nsew")
         # Maximum Seat Title Widget
@@ -56,12 +57,12 @@ class GUI(customtkinter.CTk):
         self.capture_frame.grid(row=0, column=1, padx=(20, 20), pady=(20, 20), sticky="nsew")
         # Interactive Response Label Widget
         self.info_label = customtkinter.CTkLabel(self.capture_frame,
-                                                 text="Students Card Detector",
+                                                 text="Camera not found",
                                                  font=customtkinter.CTkFont(size=20, weight="bold"),
                                                  width=1200)
         self.info_label.grid(row=0, column=0, padx=5, pady=(10, 10), sticky="")
         # Camera Widget
-        default_image = customtkinter.CTkImage(Image.open('video-not-working.png'), size=(1000, 500))
+        default_image = customtkinter.CTkImage(Image.open('video-not-working.png'), size=(635, 328))
         self.stream_label = customtkinter.CTkLabel(self.capture_frame,
                                                    text="",
                                                    image=default_image)
@@ -69,10 +70,20 @@ class GUI(customtkinter.CTk):
 
     def stream(self, capture):
         if capture is not None:
-            img = Image.fromarray(cv2.cvtColor(capture, cv2.COLOR_BGR2RGB))
+            h, w, z = capture.shape
+            if self.camera_found is False:
+                self.set_info_text("Students Card Detector")
+                self.camera_found = True
+                self.geometry(f"{w + 950}x{self.winfo_height()}")
 
+            if self.winfo_height() < 650:
+                self.geometry(f"{self.winfo_width()}x{650}")
+
+            if self.winfo_width() < (w+950):
+                self.geometry(f"{w + 950}x{self.winfo_height()}")
+            img = Image.fromarray(cv2.cvtColor(capture, cv2.COLOR_BGR2RGB))
             de = customtkinter.CTkImage(img, size=(
-                self.capture_frame.winfo_width() - 100, self.capture_frame.winfo_height() - 100))
+                self.capture_frame.winfo_width() - 60, self.capture_frame.winfo_height() - 100))
 
             self.stream_label.configure(image=de)
 
