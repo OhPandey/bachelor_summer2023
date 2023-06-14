@@ -18,6 +18,7 @@ class GUI(customtkinter.CTk):
         self.grid_columnconfigure(1, weight=1)
         self.grid_rowconfigure(0, weight=1)
 
+        self.toplevel_window = None
         # Side frame
         self.sidebar_frame = customtkinter.CTkFrame(self, width=120, corner_radius=1)
         self.sidebar_frame.grid(row=0, column=0, rowspan=4, sticky="nsew")
@@ -61,18 +62,18 @@ class GUI(customtkinter.CTk):
         self.pdf_button = customtkinter.CTkButton(self.sidebar_frame,
                                                   text="PDF",
                                                   width=60,
-                                                  command=self.save_as_pdf)
+                                                  command=self.open_filename_window_pdf)
         self.pdf_button.grid(row=4, column=0, padx=10, pady=20, sticky="sw")
         self.csv_button = customtkinter.CTkButton(self.sidebar_frame,
                                                   text="CSV",
                                                   width=60,
-                                                  command=self.save_as_csv)
+                                                  command=self.open_filename_window_csv)
         self.csv_button.grid(row=4, column=0, padx=(78, 0), pady=20, sticky="sw")
 
         self.json_button = customtkinter.CTkButton(self.sidebar_frame,
                                                    text="Json",
                                                    width=60,
-                                                   command=self.save_as_json)
+                                                   command=self.open_filename_window_json)
         self.json_button.grid(row=4, column=0, padx=(10, 10), pady=20, sticky="se")
 
         # Main frame
@@ -91,45 +92,53 @@ class GUI(customtkinter.CTk):
                                                    image=default_image)
         self.stream_label.grid(row=1, column=0, padx=20, pady=10)
 
-    def save_as_pdf(self):
-        if len(self.students.students_list) > 0:
-            self.students.save_as_pdf()
-            del self.students.students_list
-            del self.students.seat_list
-            self.students_list.remove_all()
+    def open_filename_window_pdf(self):
+        if self.toplevel_window is None or not self.toplevel_window.winfo_exists():
+            self.toplevel_window = ToplevelWindow(master=self,
+                                                  students=self.students,
+                                                  students_list=self.students_list,
+                                                  option=1)
+        self.toplevel_window.focus()
 
-    def save_as_csv(self):
-        if len(self.students.students_list) > 0:
-            self.students.save_as_csv()
-            del self.students.students_list
-            del self.students.seat_list
-            self.students_list.remove_all()
+    def open_filename_window_csv(self):
+        if self.toplevel_window is None or not self.toplevel_window.winfo_exists():
+            self.toplevel_window = ToplevelWindow(master=self,
+                                                  students=self.students,
+                                                  students_list=self.students_list,
+                                                  option=2)
+        self.toplevel_window.focus()
 
-    def save_as_json(self):
-        if len(self.students.students_list) > 0:
-            self.students.save_as_json()
-            del self.students.students_list
-            del self.students.seat_list
-            self.students_list.remove_all()
+    def open_filename_window_json(self):
+        if self.toplevel_window is None or not self.toplevel_window.winfo_exists():
+            self.toplevel_window = ToplevelWindow(master=self,
+                                                  students=self.students,
+                                                  students_list=self.students_list,
+                                                  option=3)
+        self.toplevel_window.focus()
 
     def stream(self, capture):
-        if capture is not None:
-            h, w, z = capture.shape
-            if self.camera_found is False:
-                self.set_info_text("Students Card Detector")
-                self.camera_found = True
-                self.geometry(f"{w + 950}x{self.winfo_height()}")
-
-            if self.winfo_height() < 650:
-                self.geometry(f"{self.winfo_width()}x{650}")
-
-            if self.winfo_width() < (w + 950):
-                self.geometry(f"{w + 950}x{self.winfo_height()}")
-            img = Image.fromarray(cv2.cvtColor(capture, cv2.COLOR_BGR2RGB))
-            de = customtkinter.CTkImage(img, size=(
-                self.capture_frame.winfo_width() - 40, self.capture_frame.winfo_height() - 100))
+        if capture is None:
+            de = customtkinter.CTkImage(Image.open('video-not-working.png'), size=(635, 328))
 
             self.stream_label.configure(image=de)
+            return
+
+        h, w, z = capture.shape
+        if self.camera_found is False:
+            self.set_info_text("Students Card Detector")
+            self.camera_found = True
+            self.geometry(f"{w + 950}x{self.winfo_height()}")
+
+        if self.winfo_height() < 650:
+            self.geometry(f"{self.winfo_width()}x{650}")
+
+        if self.winfo_width() < (w + 950):
+            self.geometry(f"{w + 950}x{self.winfo_height()}")
+        img = Image.fromarray(cv2.cvtColor(capture, cv2.COLOR_BGR2RGB))
+        de = customtkinter.CTkImage(img, size=(
+            self.capture_frame.winfo_width() - 40, self.capture_frame.winfo_height() - 100))
+
+        self.stream_label.configure(image=de)
 
     def set_info_text(self, text: str):
         self.info_label.configure(text=text)
@@ -141,6 +150,11 @@ class GUI(customtkinter.CTk):
             self.max_seat_label.configure(text=f"{str(number)}/{str(self.students.max_seat)} seats available")
 
     def update(self):
+        if self.toplevel_window:
+            if self.toplevel_window.remove:
+                self.toplevel_window.destroy()
+                self.toplevel_window = None
+
         if self.students.is_seat_list():
             self.pdf_button.configure(state="normal")
             self.csv_button.configure(state="normal")
@@ -214,3 +228,48 @@ class ScrollableLabelButtonFrame(customtkinter.CTkScrollableFrame):
         for button in self.button_list:
             button.destroy()
         self.button_list.clear()
+
+
+class ToplevelWindow(customtkinter.CTkToplevel):
+    def __init__(self, students, students_list, option, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.geometry("400x300")
+
+        self.remove = False
+
+        self.students = students
+        self.students_list = students_list
+        self.entry = customtkinter.CTkEntry(self, placeholder_text="Filename")
+        self.entry.pack(padx=20, pady=20)
+        if option == 1:
+            self.button = customtkinter.CTkButton(self, text="Save as PDF", command=self.save_as_pdf)
+        if option == 2:
+            self.button = customtkinter.CTkButton(self, text="Save as CSV", command=self.save_as_csv())
+        if option == 3:
+            self.button = customtkinter.CTkButton(self, text="Save as JSON", command=self.save_as_json())
+
+        self.button.pack(padx=20, pady=20)
+
+    def save_as_pdf(self):
+        if self.entry != '':
+            self.students.filename = f"{self.entry.get()}"
+        self.students.save_as_pdf()
+        self.clear()
+
+    def save_as_csv(self):
+        if self.entry != '':
+            self.students.filename = f"{self.entry.get()}"
+        self.students.save_as_csv()
+        self.clear()
+
+    def save_as_json(self):
+        if self.entry != '':
+            self.students.filename = f"{self.entry.get()}"
+        self.students.save_as_json()
+        self.clear()
+
+    def clear(self):
+        del self.students.students_list
+        del self.students.seat_list
+        self.students_list.remove_all()
+        self.remove = True

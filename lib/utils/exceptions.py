@@ -14,6 +14,14 @@ class NoMaxSeatError(Exception):
     pass
 
 
+class StudentDataStructError(Exception):
+    pass
+
+
+class DuplicateError(Exception):
+    pass
+
+
 class ThreadingError(Exception):
     def __init__(self, message):
         self.message = message

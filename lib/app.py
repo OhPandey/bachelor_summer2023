@@ -1,5 +1,7 @@
 import time
 
+import cv2
+
 from lib.data.students import Students
 from lib.debugging import config
 from lib.debugging.debugging import Debugging
@@ -32,11 +34,19 @@ class App(ResponseMediator, Debugging):
         return False
 
     def stream(self) -> None:
-        if self.target:
-            self.gui.stream(self.processing.capture_frame)
+        if self.capturing.is_active():
+            fps = self.capturing.fps
+            if self.target:
+                capture = self.processing.capture_frame
+            else:
+                capture = self.capturing.capture_frame
         else:
-            self.gui.stream(self.capturing.capture_frame)
-        self.gui.after(int(1000 / self.capturing.fps), self.stream)
+            print('Test?')
+            capture = None
+            fps = 30
+
+        self.gui.stream(capture)
+        self.gui.after(int(1000 / fps), self.stream)
 
     def update_gui(self) -> None:
         self.gui.students_list.update_students()

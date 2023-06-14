@@ -1,3 +1,4 @@
+import os
 from abc import ABC, abstractmethod
 import cv2
 import numpy
@@ -107,12 +108,12 @@ class Detector(ABC):
         data = get_config('detector', 'ocr')
         try:
             data = int(data)
-            if 0 <= data <= 1:
+            if 1 <= data <= 2:
                 return data
             else:
-                return 0  # Default value
+                return 1  # Default value
         except ValueError:
-            return 0  # Default value
+            return 1  # Default value
 
     @ocr.setter
     def ocr(self, value: int) -> None:
@@ -122,7 +123,7 @@ class Detector(ABC):
         :param value: The new OCR setting.
         :type value: None
         """
-        if value in [0, 1]:
+        if value in [1, 2]:
             change_config('detector', 'ocr', str(value))
             write_config()
         else:
@@ -283,8 +284,8 @@ class Detector(ABC):
         :rtype: Position | None
         """
 
-        y1 = self.card.y1 + self.card.get_height(1 / 1.7)
-        x2 = self.card.x2 - self.card.get_width(1 / 2.5)
+        y1 = self.card.y1 + self.card.get_height(0.5)
+        x2 = self.card.x1 + self.card.get_width(0.6)
 
         return Position(self.card.x1, y1, x2, self.card.y2)
 
@@ -337,17 +338,20 @@ class Detector(ABC):
 
         return None
 
-    def _face_recognition(self):
-        reference_image = face_recognition.load_image_file('AN IMAGE')
+    def face_recognition(self, last_name, first_name):
+        last_name = last_name.lower().text.replace(" ", "_")
+        first_name = first_name.text.replace(" ", "_")
+        face_file = os.path.join('faces', f"{last_name}_{first_name.jpg}")
+        if not os.path.isfile(os.path.join('faces', f"{face_file}")):
+            return False
+
+        reference_image = face_recognition.load_image_file(face_file)
         target_image = self.face
 
         results = face_recognition.compare_faces(face_recognition.face_encodings(reference_image)[0],
                                                  face_recognition.face_encodings(target_image)[0])
 
-        if results[0]:
-            print("The faces match!")
-        else:
-            print("The faces do not match.")
+        return results[0]
 
     # Debugging
     def draw_rectangle(self) -> numpy:
@@ -362,15 +366,8 @@ class Detector(ABC):
 
         """
         if self.card is not None:
-            # Face
-            face = cv2.rectangle(self.frame,
-                                 (self.face.x1, self.face.y1),
-                                 (self.face.x2, self.face.y2),
-                                 (255, 0, 0),
-                                 2)
-
             # Student card
-            card = cv2.rectangle(face,
+            card = cv2.rectangle(self.frame,
                                  (self.card.x1, self.card.y1),
                                  (self.card.x2, self.card.y2),
                                  (0, 0, 255),
@@ -415,6 +412,15 @@ class Detector(ABC):
                                      1,
                                      (0, 255, 0),
                                      2)
+
+            if self.face is not None:
+                # Face
+                face = cv2.rectangle(self.frame,
+                                     (self.face.x1, self.face.y1),
+                                     (self.face.x2, self.face.y2),
+                                     (255, 0, 0),
+                                     2)
+                return face
 
             return scan_texty
         else:

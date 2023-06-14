@@ -1,14 +1,14 @@
 import time
 import numpy
-
 from lib.data.students import Students
 from lib.debugging import config
 from lib.debugging.debugging import Debugging
 from lib.debugging.subdirectory import Subdirectory
 from lib.detector.detector import Detector
-from lib.detector.hmldetector import HMLDetector
+from lib.detector.basicdetector import BasicDetector
+from lib.detector.dldetector import DLDetector
 from lib.interfaces.mediator.component import Component
-from lib.utils.exceptions import AddingStudentError, NoMaxSeatError, NoSeatAvailableError
+from lib.utils.exceptions import NoMaxSeatError, NoSeatAvailableError, StudentDataStructError, DuplicateError
 from lib.interfaces.thread.thread import Thread
 
 
@@ -126,6 +126,9 @@ class Processing(Thread, Debugging, Component):
         :return: True if the main buffer is full, False otherwise.
         :rtype: bool
         """
+        if self.buffer_size == -1:
+            return False
+
         return len(self.main_buffer) >= self.buffer_size
 
     def _mainloop(self) -> None:
@@ -134,6 +137,7 @@ class Processing(Thread, Debugging, Component):
         """
         while self.is_running():
             if self.is_active():
+                # This is for testing purposes and not recommended.
                 if self.target is True:
                     if len(self.main_buffer) > 0:
                         self.capture_frame = self.get_detection(self.main_buffer[len(self.main_buffer)-1]).draw_rectangle()
@@ -144,9 +148,9 @@ class Processing(Thread, Debugging, Component):
                     if card_result == 0:
                         self._run()
                     if card_result == 1:
-                        self.mediator.response = "Card is too far away"
+                        self.mediator.response = "Student Card is too far away."
                     if card_result == 2:
-                        self.mediator.response = "Card is not fully visible"
+                        self.mediator.response = "Student Card is not fully visible."
                     del self.main_buffer
             else:
                 time.sleep(0.1)
@@ -160,7 +164,11 @@ class Processing(Thread, Debugging, Component):
         :rtype: Detector
         """
         if self.detection_option == 1:
-            return HMLDetector(frame)
+            return BasicDetector(frame)
+        if self.detection_option == 2:
+            return DLDetector(frame)
+
+        return DLDetector(frame)
 
     def _run(self) -> None:
         """
@@ -183,14 +191,23 @@ class Processing(Thread, Debugging, Component):
             self.log("run(): Data was None")
         else:
             try:
+                if config.get_config('detector', 'recognition') == 'True':
+                    if detectors[index].face_recognition(data['last_name'], data['first_name']):
+                        self.mediator.response = f"Face recognition did not match"
+                        self.log("run(): Potential fake student")
+                        return
                 self._students.students_list = data
                 self.mediator.response = f"Student '{data['last_name']} {data['first_name']}' has been added"
-            except AddingStudentError as error:
-                self.log(f"run(): {error}")
+            except StudentDataStructError:
+                self.mediator.response = f"There was an error adding this Student"
+                self.log("run(): StudentDataStructError")
+            except DuplicateError:
+                self.mediator.response = f"This student was already added."
+                self.log("run(): DuplicateError")
             except NoSeatAvailableError:
-                self.mediator.response = f"There is no more seat available. Either save it or delete some students"
+                self.mediator.response = f"There is no more seat available. Either save it or delete some students."
             except NoMaxSeatError:
-                self.mediator.response = f"Please enter available seats"
+                self.mediator.response = f"Please enter seats to proceed."
 
     def start(self) -> None:
         """

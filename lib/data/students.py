@@ -4,18 +4,18 @@ import csv
 
 from datetime import datetime
 from lib.data.student import Student
-from lib.utils.exceptions import AddingStudentError, NoSeatAvailableError, NoMaxSeatError
+from lib.utils.exceptions import NoSeatAvailableError, NoMaxSeatError, StudentDataStructError, DuplicateError
 from fpdf import FPDF
-from lib.data.dataset import STUDENT_REQUIRED_KEYS
+from lib.data.dataset import is_student_dict
 
 
 class Students:
-    filename = "default-" + str(datetime.now().strftime("%y%m%d%H%M"))
 
     def __init__(self):
         """
         Constructor.
         """
+        self.filename = "default-" + str(datetime.now().strftime("%y%m%d%H%M"))
         self._students_list = list()
         self._seat_list = None
         self._max_seat = None
@@ -38,27 +38,22 @@ class Students:
 
         :param data: A dictionary containing the student data.
         :type data: dict
-        :raises AddingStudentError: If the dictionary does not meet the required keys.
-        :raises AddingStudentError: If the data given is a duplicate.
-        :raises MaxSeatError: If there are no available seats.
+        :raises StudentDataStructError: If the dictionary does not meet the required keys.
+        :raises DuplicateError: If the data given is a duplicate.
+        :raises MaxSeatError: If there is no max seat available
+        :raises NoSeatAvailable: If there is no seat available.
         """
-        if not all(key in data for key in STUDENT_REQUIRED_KEYS):
-            array = []
-
-            for key in STUDENT_REQUIRED_KEYS:
-                if key not in data:
-                    array.append(key)
-
-            raise AddingStudentError("The dictionary given does not meet the required keys: " + str(array))
+        if not is_student_dict(data):
+            raise StudentDataStructError()
 
         if self.is_duplicate(data["student_id"]):
-            raise AddingStudentError("The data given is a duplicate")
+            raise DuplicateError()
 
         if self.seat_list == -1:
-            raise NoMaxSeatError(Exception)
+            raise NoMaxSeatError()
 
         if self.seat_list == 0:
-            raise NoSeatAvailableError(Exception)
+            raise NoSeatAvailableError()
 
         val = self._seat_list[random.randint(0, self.seat_list - 1)]
         self._seat_list.remove(val)
@@ -118,6 +113,7 @@ class Students:
             if x.student_id == student_id:
                 self.remove_student_by_index(i)
                 return True
+
         return False
 
     def is_duplicate(self, student_id) -> bool:
@@ -146,6 +142,7 @@ class Students:
         """
         if self._seat_list is None:
             return -1
+
         return len(self._seat_list)
 
     @seat_list.setter
@@ -164,7 +161,7 @@ class Students:
         """
         Clear the seat list.
         """
-        self._max_seat = None
+        del self.max_seat
         self._seat_list = None
 
     def is_seat_list(self) -> bool:
@@ -188,15 +185,14 @@ class Students:
             return -1
         return self._max_seat
 
-    # Saving file functions
-    def set_filename(self, filename):
+    @max_seat.deleter
+    def max_seat(self) -> None:
         """
-        Set the filename for saving the data.
+        Deletes the max_seat
+        """
+        self._max_seat = None
 
-        :param filename: The filename to set.
-        :type filename: str
-        """
-        self.filename = filename
+    # Saving file functions
 
     def save_as_pdf(self) -> None:
         """

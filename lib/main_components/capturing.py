@@ -5,19 +5,11 @@ from lib.debugging.subdirectory import Subdirectory
 from lib.interfaces.mediator.component import Component
 from lib.main_components.processing import Processing
 from lib.debugging.debugging import Debugging
-from lib.utils.exceptions import CameraNotAvailable, ProcessingNotAvailableError
+from lib.utils.exceptions import ProcessingNotAvailableError
 from lib.interfaces.thread.thread import Thread
 
 
 class Capturing(Thread, Debugging, Component):
-    _capture: "VideoCapture | None" = None
-    capture_frame: "numpy | None" = None
-    _processing: "Processing | None" = None
-
-    width: int = None
-    height: int = None
-    fps: int = None
-
     def __init__(self, channel: int):
         """
         Constructor.
@@ -27,6 +19,15 @@ class Capturing(Thread, Debugging, Component):
         """
         Thread.__init__(self)
         Debugging.__init__(self, Subdirectory.CAPTURING)
+
+        self._capture = None
+        self.capture_frame = None
+        self._processing = None
+
+        self.width = -1
+        self.height = -1
+        self.fps = -1
+
         self.log("__init__(): Started")
         self.capture = channel
 
@@ -50,15 +51,16 @@ class Capturing(Thread, Debugging, Component):
          """
         self._capture = cv2.VideoCapture(channel)
         if self._capture.isOpened():
-            self.width = int(self.capture.get(cv2.CAP_PROP_FRAME_WIDTH))
-            self.height = int(self.capture.get(cv2.CAP_PROP_FRAME_HEIGHT))
-            self.fps = int(self.capture.get(cv2.CAP_PROP_FPS))
-            self.log(f"capture.setter: Capture with channel {channel} initialized. "
-                     f"Width: {self.width}, Height: {self.height}, FPS: {self.fps}")
-        else:
-            del self.capture
-            self.log(f"Capture with channel {channel} not available.")
-            raise CameraNotAvailable
+            if self.capture.get(cv2.CAP_PROP_FPS) > 0:
+                self.width = int(self.capture.get(cv2.CAP_PROP_FRAME_WIDTH))
+                self.height = int(self.capture.get(cv2.CAP_PROP_FRAME_HEIGHT))
+                self.fps = int(self.capture.get(cv2.CAP_PROP_FPS))
+                self.log(f"capture.setter: Capture with channel {channel} initialized. "
+                         f"Width: {self.width}, Height: {self.height}, FPS: {self.fps}")
+                return
+
+        del self.capture
+        self.log(f"Capture with channel {channel} not available.")
 
     @capture.deleter
     def capture(self) -> None:
@@ -68,6 +70,7 @@ class Capturing(Thread, Debugging, Component):
         if self._capture:
             self.log(f"capture.deleter: Capture released.")
             self._capture.release()
+
         self._capture = None
         self.width = -1
         self.height = -1
@@ -143,6 +146,7 @@ class Capturing(Thread, Debugging, Component):
                         self.processing.main_buffer = self.capture_frame
                 else:
                     del self.capture
+                    self.mediator.response = "Lost camera connection"
                     self.log("mainloop(): Lost camera connection")
             else:
                 time.sleep(0.1)

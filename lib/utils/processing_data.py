@@ -127,8 +127,6 @@ def processing_data(data_list: list):
         if data["first_name"][0] == " ":
             data["first_name"] = data["first_name"][1:]
 
-    print(data)
-
     if is_student_dic_empty(data):
         return None
 
