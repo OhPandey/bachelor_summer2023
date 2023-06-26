@@ -244,9 +244,9 @@ class ToplevelWindow(customtkinter.CTkToplevel):
         if option == 1:
             self.button = customtkinter.CTkButton(self, text="Save as PDF", command=self.save_as_pdf)
         if option == 2:
-            self.button = customtkinter.CTkButton(self, text="Save as CSV", command=self.save_as_csv())
+            self.button = customtkinter.CTkButton(self, text="Save as CSV", command=self.save_as_csv)
         if option == 3:
-            self.button = customtkinter.CTkButton(self, text="Save as JSON", command=self.save_as_json())
+            self.button = customtkinter.CTkButton(self, text="Save as JSON", command=self.save_as_json)
 
         self.button.pack(padx=20, pady=20)
 
