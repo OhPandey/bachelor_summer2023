@@ -174,7 +174,7 @@ class Processing(Thread, Debugging, Component):
         """
         Run the processing and detect student information from the best frame
         """
-        detectors = [self.get_detection(self.main_buffer[i]) for i in range(10)]
+        detectors = [self.get_detection(self.main_buffer[i]) for i in range(self.buffer_size)]
 
         highest_quality = 0
         index = 0
