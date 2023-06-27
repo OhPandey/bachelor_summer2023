@@ -41,7 +41,6 @@ class App(ResponseMediator, Debugging):
             else:
                 capture = self.capturing.capture_frame
         else:
-            print('Test?')
             capture = None
             fps = 30
 
